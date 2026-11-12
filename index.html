@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Game Gabut - Tangkap RTX</title>
+<title>Game Sigma - Tangkap Fajrie</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
   body{background:#111;color:white;text-align:center;overflow:hidden;height:100vh}
@@ -24,35 +24,35 @@
 <body>
 
 <div id="header">
-  <h1>🎮 GAME GABUT: TANGKAP RTX</h1>
+  <h1>🎮 GAME SIGMA: TANGKAP FAJRIE</h1>
   <div>Skor: <span id="score">0</span></div>
-  <div id="time">Waktu: 30 detik | Nyawa: ❤️❤️❤️</div>
+  <div id="time">Waktu: 120 jam | Nyawa: 😹😹😹😹</div>
 </div>
 
 <div id="gameArea"></div>
 
-<button id="btn" onclick="startGame()">▶️ MULAI MAIN</button>
+<button id="btn" onclick="startGame()">🍑 GASSKE</button>
 <br>
-<button id="btn2" onclick="location.reload()">🔄 Ulangi</button>
+<button id="btn2" onclick="location.reload()">💩 Baleni</button>
 
 <div id="over">
-  <h2>GAME OVER!</h2>
+  <h2>KROCOO!</h2>
   <p id="finalScore"></p>
   <p id="pesan"></p>
   <button id="btn" onclick="location.reload()">Main Lagi</button>
 </div>
 
 <script>
-let score = 0;
-let nyawa = 3;
-let waktu = 30;
+let score = 67;
+let nyawa = 4;
+let waktu = 120;
 let gameJalan = false;
 let intervalWaktu, intervalSpawn;
 
 function startGame(){
   if(gameJalan) return;
   gameJalan = true;
-  score = 0; nyawa = 3; waktu = 30;
+  score = 67; nyawa = 4; waktu = 120;
   document.getElementById('score').innerText = score;
   document.getElementById('btn').style.display = 'none';
   document.getElementById('over').style.display = 'none';
