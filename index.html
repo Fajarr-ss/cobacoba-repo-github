@@ -56,7 +56,18 @@ function startGame(){
   document.getElementById('score').innerText = score;
   document.getElementById('btn').style.display = 'none';
   document.getElementById('over').style.display = 'none';
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Fajrie gooner</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Arial Black',Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+  body{background:#0f0f0f;color:#fff;overflow:hidden;height:100vh;display:flex;flex-direction:column}
+  #top{background:#1a1a1a;padding:10px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #00ff88}
+  #top b{font-size:16px}
+  #skor{color:#00ff88;font-size:20px}
+  #nyawa{color:#ff4444;font-size:18px}
+  #level{color:#ffcc00;font-size:14px}
+  canvas{flex:1;background:linear-gradient(#111,#222);width:100%;display:block;touch-action:none}
+  #layarAwal,#layarAkhir{position:absolute;inset:0;background:rgba(0,0,0,.9);display:flex;flex-direction:column;justify-content:center;align-items
   // Timer
   intervalWaktu = setInterval(()=>{
     waktu--;
