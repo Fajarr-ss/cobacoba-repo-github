@@ -3,220 +3,257 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Game Sigma - Tangkap Fajrie</title>
+<title>EFOOTBALL 2D - RTX FC</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-  body { background: #111; color: white; text-align: center; overflow: hidden; height: 100vh; }
-  #header { padding: 15px; }
-  h1 { font-size: 22px; margin-bottom: 5px; }
-  #score { font-size: 28px; color: #00ff88; font-weight: bold; }
-  #time { font-size: 16px; color: #ffcc00; margin-top: 4px; }
-  #gameArea {
-    position: relative;
-    width: 100%;
-    height: 68vh;
-    background: #1a1a1a;
-    border-top: 2px solid #333;
-    border-bottom: 2px solid #333;
-    overflow: hidden;
-  }
-  .item {
-    position: absolute;
-    font-size: 46px;
-    cursor: pointer;
-    user-select: none;
-    transition: transform 0.1s;
-    padding: 5px;
-  }
-  .item:active { transform: scale(1.3); }
-  .btn-start {
-    padding: 12px 28px;
-    font-size: 18px;
-    background: #00ff88;
-    color: #111;
-    border: none;
-    border-radius: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 15px;
-  }
-  .btn-start:active { transform: scale(0.95); }
-  #btn2 {
-    padding: 10px 20px;
-    background: #444;
-    color: white;
-    border: none;
-    border-radius: 15px;
-    margin-top: 10px;
-    cursor: pointer;
-  }
-  #over {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.9);
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    z-index: 10;
-    padding: 20px;
-  }
-  #over h2 { font-size: 36px; color: #ff4444; margin-bottom: 10px; }
-  #over p { font-size: 20px; margin: 8px 0; }
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#0a1a0a;color:#fff;overflow:hidden}
+#menu{position:absolute;inset:0;background:linear-gradient(180deg,#0a2a12,#000);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:20;text-align:center}
+#menu h1{font-size:34px;color:#00ff88;text-shadow:0 0 20px #00ff88}
+#menu p{color:#ccc;margin:8px 0 18px}
+.card{background:#16281a;border:1px solid #2a4a30;border-radius:15px;padding:15px;width:100%;max-width:420px;margin-bottom:12px;text-align:left}
+.card h3{color:#ffcc00;margin-bottom:8px;font-size:15px}
+select,button{width:100%;padding:12px;border-radius:10px;border:none;font-size:15px;font-weight:bold;margin-top:6px}
+select{background:#222;color:#fff}
+.btnMain{background:#00ff88;color:#000;font-size:18px;cursor:pointer}
+.row{display:flex;gap:8px}
+.row button{flex:1;background:#333;color:#fff}
+.row button.aktif{background:#00ff88;color:#000}
+#hud{position:absolute;top:0;left:0;right:0;display:none;justify-content:space-between;padding:8px 12px;background:rgba(0,0,0,.7);z-index:10;font-weight:bold}
+#skor{font-size:22px;color:#ffcc00}
+#waktu{font-size:14px}
+canvas{width:100vw;height:100vh;display:block;background:#2e9e4f}
+#kontrol{position:absolute;bottom:15px;left:0;right:0;display:none;justify-content:space-between;padding:0 15px;z-index:10}
+#joy{width:120px;height:120px;background:rgba(255,255,255,.15);border-radius:50%;position:relative;border:2px solid rgba(255,255,255,.4)}
+#stick{width:50px;height:50px;background:#fff;border-radius:50%;position:absolute;left:35px;top:35px}
+.tombol{width:65px;height:65px;border-radius:50%;border:none;font-weight:bold;font-size:13px;color:#fff}
+#pass{background:#2196f3}#shoot{background:#ff4444}#sprint{background:#ffcc00;color:#000}
+#infoTaktik{position:absolute;top:45px;left:10px;background:rgba(0,0,0,.6);padding:6px 10px;border-radius:10px;font-size:12px;z-index:10;display:none}
 </style>
 </head>
 <body>
 
-<div id="header">
-  <h1>🎮 GAME SIGMA: TANGKAP FAJRIE</h1>
-  <div>Skor: <span id="score">67</span></div>
-  <div id="time">Waktu: 120 detik | Nyawa: 😹😹😹😹</div>
+<div id="menu">
+  <h1>⚽ EFOOTBALL 2D</h1>
+  <p>RTX FC vs BOM FC • Tim-mu kerjasama otomatis koyo pro</p>
+  <div class="card">
+    <h3>1. PILIH FORMASI TIM-MU</h3>
+    <div class="row" id="formasiBtn">
+      <button class="aktif" onclick="pilihFormasi(this,'4-4-2')">4-4-2</button>
+      <button onclick="pilihFormasi(this,'4-3-3')">4-3-3</button>
+      <button onclick="pilihFormasi(this,'3-5-2')">3-5-2</button>
+      <button onclick="pilihFormasi(this,'5-3-2')">5-3-2</button>
+    </div>
+    <h3 style="margin-top:12px">2. STRATEGI / MENTALITAS</h3>
+    <div class="row" id="mentalBtn">
+      <button onclick="pilihMental(this,'bertahan')">🛡️ Bertahan</button>
+      <button class="aktif" onclick="pilihMental(this,'seimbang')">⚖️ Seimbang</button>
+      <button onclick="pilihMental(this,'menyerang')">🔥 Menyerang</button>
+    </div>
+    <h3 style="margin-top:12px">3. GAYA MAIN</h3>
+    <select id="gaya">
+      <option value="tiki">Tiki-Taka - Umpan Pendek Cepet</option>
+      <option value="counter">Counter Attack - Lari Kenceng Pas Rebut Bola</option>
+      <option value="long">Long Ball - Umpan Jauh Langsung Nyerang</option>
+    </select>
+  </div>
+  <button class="btnMain" onclick="mulai()">▶️ KICK OFF!</button>
+  <p style="font-size:12px">PC: WASD Gerak • J Umpan • K Tembak • L Sprint<br>HP: Joystick kiri + Tombol kanan</p>
 </div>
 
-<div id="gameArea"></div>
+<div id="hud"><div>RTX FC <span id="skor">0 - 0</span> BOM FC</div><div id="waktu">90:00</div><div id="taktikHud">4-4-2 • Seimbang</div></div>
+<div id="infoTaktik"></div>
+<canvas id="game"></canvas>
 
-<button id="btn" class="btn-start" onclick="startGame()">🍑 GASSKE</button>
-<br>
-<button id="btn2" onclick="location.reload()">💩 Baleni</button>
-
-<div id="over">
-  <h2>KROCOO!</h2>
-  <p id="finalScore"></p>
-  <p id="pesan"></p>
-  <button class="btn-start" onclick="location.reload()">Main Lagi</button>
+<div id="kontrol">
+  <div id="joy"><div id="stick"></div></div>
+  <div style="display:flex;gap:10px;align-items:end">
+    <button class="tombol" id="pass">UMPAN</button>
+    <button class="tombol" id="shoot">TEMBAK</button>
+    <button class="tombol" id="sprint">SPRINT</button>
+  </div>
 </div>
 
 <script>
-let score = 67;
-let nyawa = 4;
-let waktu = 120;
-let gameJalan = false;
-let intervalWaktu, intervalSpawn;
+const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
+let W,H; function rs(){W=canvas.width=innerWidth;H=canvas.height=innerHeight} addEventListener('resize',rs); rs();
 
-const gameArea = document.getElementById('gameArea');
+let formasi='4-4-2', mental='seimbang', gaya='tiki';
+let pemain=[], musuh=[], bola, skorA=0, skorB=0, menit=0, detik=0, gameJalan=false, pemainAktif=null, keys={}, joyX=0, joyY=0, sprint=false;
 
-// Daftar item: ikon, poin, dan status apakah bom/zonk
-const daftarItem = [
-  { emoji: '😎', poin: 10, jenis: 'target' }, // Fajrie Sigma
-  { emoji: '🗿', poin: 15, jenis: 'target' }, // Sigma bonus
-  { emoji: '🍑', poin: 20, jenis: 'target' }, // Super bonus
-  { emoji: '💩', poin: -15, jenis: 'bom' },   // Zonk kurangi nyawa
-  { emoji: '💣', poin: -20, jenis: 'bom' }    // Bom kurangi nyawa
-];
+function pilihFormasi(el,f){formasi=f; document.querySelectorAll('#formasiBtn button').forEach(b=>b.classList.remove('aktif')); el.classList.add('aktif');}
+function pilihMental(el,m){mental=m; document.querySelectorAll('#mentalBtn button').forEach(b=>b.classList.remove('aktif')); el.classList.add('aktif');}
 
-function updateUI() {
-  document.getElementById('score').innerText = score;
-  let hati = nyawa > 0 ? '😹'.repeat(nyawa) : '💀';
-  document.getElementById('time').innerText = `Waktu: ${waktu} detik | Nyawa: ${hati}`;
+const FORMASI={
+ '4-4-2':[{x:.08,y:.5},{x:.25,y:.2},{x:.25,y:.4},{x:.25,y:.6},{x:.25,y:.8},{x:.45,y:.2},{x:.45,y:.4},{x:.45,y:.6},{x:.45,y:.8},{x:.68,y:.35},{x:.68,y:.65}],
+ '4-3-3':[{x:.08,y:.5},{x:.25,y:.2},{x:.25,y:.4},{x:.25,y:.6},{x:.25,y:.8},{x:.45,y:.35},{x:.45,y:.5},{x:.45,y:.65},{x:.68,y:.2},{x:.72,y:.5},{x:.68,y:.8}],
+ '3-5-2':[{x:.08,y:.5},{x:.25,y:.25},{x:.25,y:.5},{x:.25,y:.75},{x:.45,y:.15},{x:.45,y:.35},{x:.45,y:.5},{x:.45,y:.65},{x:.45,y:.85},{x:.68,y:.35},{x:.68,y:.65}],
+ '5-3-2':[{x:.08,y:.5},{x:.25,y:.1},{x:.25,y:.3},{x:.25,y:.5},{x:.25,y:.7},{x:.25,y:.9},{x:.45,y:.35},{x:.45,y:.5},{x:.45,y:.65},{x:.68,y:.35},{x:.68,y:.65}]
+};
+function buatTim(isMusuh){
+  let arr=[]; let f=FORMASI[formasi];
+  for(let i=0;i<11;i++){
+    let pos=f[i];
+    let x = isMusuh ? W-(pos.x*W) : pos.x*W;
+    // Mental ngaruh posisi awal: menyerang maju, bertahan mundur
+    if(!isMusuh && mental==='menyerang') x+=40;
+    if(!isMusuh && mental==='bertahan') x-=40;
+    arr.push({x,y:pos.y*H, homeX:x, homeY:pos.y*H, vx:0, vy:0, speed:2.2+Math.random()*0.6, tim:isMusuh?'musuh':'kita', no:i+1, stamina:100});
+  }
+  return arr;
+}
+function mulai(){
+  formasi=document.querySelector('#formasiBtn .aktif').innerText;
+  gaya=document.getElementById('gaya').value;
+  document.getElementById('menu').style.display='none';
+  document.getElementById('hud').style.display='flex';
+  document.getElementById('kontrol').style.display='flex';
+  document.getElementById('infoTaktik').style.display='block';
+  document.getElementById('taktikHud').innerText=formasi+' • '+mental;
+  document.getElementById('infoTaktik').innerHTML='🧠 Strategi: '+formasi+' | '+mental+' | '+gaya+'<br>Pemain AI lagi kerjasama...';
+  pemain=buatTim(false); musuh=buatTim(true);
+  bola={x:W/2,y:H/2,vx:0,vy:0,pemilik:null};
+  pemainAktif=pemain[5]; gameJalan=true;
+  requestAnimationFrame(loop);
+  setInterval(()=>{ if(gameJalan){ detik++; if(detik>=60){detik=0;menit++;} let m=String(Math.min(90,menit)).padStart(2,'0'); document.getElementById('waktu').innerText=m+':'+String(detik).padStart(2,'0'); if(menit>=2){ gameJalan=false; alert('FT: RTX FC '+skorA+' - '+skorB+' BOM FC\n'+(skorA>skorB?'MENANG! GG 🔥':'Coba lagi mas 😅')); location.reload(); } } },1000);
 }
 
-function startGame() {
-  if (gameJalan) return;
-  gameJalan = true;
-  score = 67;
-  nyawa = 4;
-  waktu = 120;
-  gameArea.innerHTML = '';
+// Kontrol
+addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true; if(e.key.toLowerCase()==='j') umpan(); if(e.key.toLowerCase()==='k') tembak(); if(e.key.toLowerCase()==='l') sprint=true;});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false; if(e.key.toLowerCase()==='l') sprint=false;});
+let joy=document.getElementById('joy'), stick=document.getElementById('stick'), joyAktif=false;
+joy.addEventListener('touchstart',e=>{joyAktif=true});
+joy.addEventListener('touchmove',e=>{let r=joy.getBoundingClientRect(); let t=e.touches[0]; joyX=(t.clientX-(r.left+60))/60; joyY=(t.clientY-(r.top+60))/60; let l=Math.max(-1,Math.min(1,joyX)), tt=Math.max(-1,Math.min(1,joyY)); stick.style.left=(35+l*25)+'px'; stick.style.top=(35+tt*25)+'px';});
+joy.addEventListener('touchend',()=>{joyX=0;joyY=0;stick.style.left='35px';stick.style.top='35px';});
+document.getElementById('pass').addEventListener('touchstart',umpan);
+document.getElementById('shoot').addEventListener('touchstart',tembak);
+document.getElementById('sprint').addEventListener('touchstart',()=>sprint=true);
+document.getElementById('sprint').addEventListener('touchend',()=>sprint=false);
 
-  updateUI();
-  document.getElementById('btn').style.display = 'none';
-  document.getElementById('over').style.display = 'none';
-
-  // Timer mundur tiap 1 detik
-  intervalWaktu = setInterval(() => {
-    waktu--;
-    updateUI();
-    if (waktu <= 0) {
-      gameOver('Waktu habis bro!');
-    }
-  }, 1000);
-
-  // Munculkan item baru tiap 700 milidetik
-  intervalSpawn = setInterval(spawnItem, 700);
+function cariTemanTerdekat(p){
+  let best=null, bd=1e9;
+  pemain.forEach(t=>{ if(t===p) return; let d=Math.hypot(t.x-p.x,t.y-p.y); if(d<bd){bd=d;best=t;} });
+  return best;
+}
+function umpan(){
+  if(!bola.pemilik || bola.pemilik.tim!=='kita') return;
+  let p=bola.pemilik; let target=cariTemanTerdekat(p);
+  // Gaya Long Ball: umpan jauh ke depan
+  if(gaya==='long'){ target=pemain.reduce((a,b)=> (b.x>a.x?b:a)); }
+  // Gaya Tiki: umpan ke teman paling deket + buka ruang
+  bola.pemilik=null; let dx=target.x-p.x, dy=target.y-p.y, d=Math.hypot(dx,dy)||1;
+  bola.vx=dx/d*11; bola.vy=dy/d*11;
+  // Temen langsung lari nyambut bola (kerjasama!)
+  target.homeX=target.x+dx*0.2; target.homeY=target.y+dy*0.2;
+}
+function tembak(){
+  if(!bola.pemilik || bola.pemilik.tim!=='kita') return;
+  let p=bola.pemilik; bola.pemilik=null;
+  let gx=W-10, gy=H/2; let dx=gx-p.x, dy=gy-p.y, d=Math.hypot(dx,dy)||1;
+  bola.vx=dx/d*16; bola.vy=dy/d*16 + (Math.random()-.5)*3;
+}
+function resetBola(keKiri){
+  bola={x:W/2,y:H/2,vx:0,vy:0,pemilik:null};
+  pemain.forEach(p=>{p.x=p.homeX;p.y=p.homeY}); musuh.forEach(p=>{p.x=p.homeX;p.y=p.homeY});
 }
 
-function spawnItem() {
-  if (!gameJalan) return;
+function loop(){
+  if(!gameJalan) return;
+  // --- GERAK PEMAIN KITA YANG DIKONTROL ---
+  let dx=0, dy=0;
+  if(keys['w']||keys['arrowup']) dy-=1; if(keys['s']||keys['arrowdown']) dy+=1;
+  if(keys['a']||keys['arrowleft']) dx-=1; if(keys['d']||keys['arrowright']) dx+=1;
+  dx+=joyX; dy+=joyY;
+  let dl=Math.hypot(dx,dy)||1; if(dl>0.1){ dx/=dl; dy/=dl; }
+  let spd = sprint?5.5:3.8;
+  pemainAktif.x+=dx*spd; pemainAktif.y+=dy*spd;
 
-  const data = daftarItem[Math.floor(Math.random() * daftarItem.length)];
-  const el = document.createElement('div');
-  el.className = 'item';
-  el.innerText = data.emoji;
-
-  // Posisi horizontal acak
-  const maxX = gameArea.clientWidth - 60;
-  const posX = Math.max(10, Math.floor(Math.random() * maxX));
-  let posY = -50;
-
-  el.style.left = posX + 'px';
-  el.style.top = posY + 'px';
-  gameArea.appendChild(el);
-
-  // Kecepatan jatuh acak
-  const kecepatan = 3 + Math.random() * 3;
-  let tertangkap = false;
-
-  // Event saat diklik atau disentuh di HP
-  const tangkap = (e) => {
-    e.preventDefault();
-    if (!gameJalan || tertangkap) return;
-    tertangkap = true;
-
-    if (data.jenis === 'bom') {
-      nyawa--;
-      score = Math.max(0, score + data.poin);
-    } else {
-      score += data.poin;
+  // --- AI TEMEN SETIM: KERJASAMA ---
+  pemain.forEach(p=>{
+    if(p===pemainAktif) return;
+    // Target posisi = home + bola influence + strategi
+    let targetX=p.homeX, targetY=p.homeY;
+    let bolaFactor = mental==='menyerang'?0.45 : mental==='bertahan'?0.18 : 0.30;
+    // Kalo tim pegang bola, temen lari maju buka ruang. Kalo musuh pegang bola, temen mundur pressing
+    if(bola.pemilik && bola.pemilik.tim==='kita'){ targetX = p.homeX + (bola.x-p.homeX)*bolaFactor + 30; }
+    else if(bola.pemilik && bola.pemilik.tim==='musuh'){ targetX = p.homeX - 20; }
+    else { targetX = p.homeX + (bola.x-p.homeX)*0.25; }
+    // Gaya Counter: pas rebut bola, semua lari kenceng ke depan
+    if(gaya==='counter' && bola.pemilik && bola.pemilik.tim==='kita') targetX+=60;
+    // Gaya Tiki: jaga jarak, jangan numpuk
+    if(gaya==='tiki') targetY = p.homeY + Math.sin(Date.now()/1000 + p.no)*10;
+    let ddx=targetX-p.x, ddy=targetY-p.y, dd=Math.hypot(ddx,ddy);
+    if(dd>5){ p.x+=ddx/dd*p.speed*0.7; p.y+=ddy/dd*p.speed*0.7; }
+    // Kalo bola lepas deket dia, dia ambil
+    if(!bola.pemilik && Math.hypot(bola.x-p.x,bola.y-p.y)<25 && p!==pemainAktif){
+      // Rebut otomatis, tapi yang paling deket jadi aktif
+      let jarakAktif=Math.hypot(bola.x-pemainAktif.x,bola.y-pemainAktif.y);
+      if(Math.hypot(bola.x-p.x,bola.y-p.y) < jarakAktif) pemainAktif=p;
     }
+  });
 
-    updateUI();
-    el.remove();
-
-    if (nyawa <= 0) {
-      gameOver('Nyawamu entek kena jebakan!');
-    }
-  };
-
-  el.addEventListener('mousedown', tangkap);
-  el.addEventListener('touchstart', tangkap);
-
-  // Animasi jatuh ke bawah
-  const jatuh = setInterval(() => {
-    if (!gameJalan || tertangkap) {
-      clearInterval(jatuh);
-      return;
-    }
-
-    posY += kecepatan;
-    el.style.top = posY + 'px';
-
-    // Jika melewati batas bawah area game
-    if (posY > gameArea.clientHeight) {
-      clearInterval(jatuh);
-      el.remove();
-
-      // Jika target sigma lolos tidak tertangkap, nyawa berkurang 1
-      if (data.jenis === 'target' && gameJalan) {
-        nyawa--;
-        updateUI();
-        if (nyawa <= 0) {
-          gameOver('Fajrie kabur terus, nyawa habis!');
-        }
+  // --- AI MUSUH ---
+  musuh.forEach(m=>{
+    let tx=m.homeX, ty=m.homeY;
+    if(bola.pemilik && bola.pemilik.tim==='kita'){ tx=m.homeX-30; } // musuh mundur / pressing
+    if(!bola.pemilik){ tx=m.homeX+(bola.x-m.homeX)*0.3; ty=m.homeY+(bola.y-m.homeY)*0.3; }
+    if(bola.pemilik && bola.pemilik.tim==='musuh' && bola.pemilik===m){
+      // Musuh bawa bola nyerang ke kiri
+      m.x-=2.5; m.y+=(H/2-m.y)*0.01;
+      if(m.x<120 && Math.random()<0.02){ bola.pemilik=null; bola.vx=-12; bola.vy=(Math.random()-.5)*4; } // musuh nembak
+      if(Math.random()<0.005){ // musuh umpan ke temen
+        let t=musuh[Math.floor(Math.random()*musuh.length)];
+        bola.pemilik=null; bola.vx=(t.x-m.x)*0.1; bola.vy=(t.y-m.y)*0.1;
       }
+    } else {
+      let ddx=tx-m.x, ddy=ty-m.y, dd=Math.hypot(ddx,ddy);
+      if(dd>5){ m.x+=ddx/dd*m.speed*0.7; m.y+=ddy/dd*m.speed*0.7; }
     }
-  }, 20);
-}
+    // Musuh rebut bola
+    if(!bola.pemilik && Math.hypot(bola.x-m.x,bola.y-m.y)<22) bola.pemilik=m;
+  });
 
-function gameOver(alasan) {
-  gameJalan = false;
-  clearInterval(intervalWaktu);
-  clearInterval(intervalSpawn);
+  // --- BOLA ---
+  if(bola.pemilik){ bola.x=bola.pemilik.x+12; bola.y=bola.pemilik.y+10; }
+  else { bola.x+=bola.vx; bola.y+=bola.vy; bola.vx*=0.97; bola.vy*=0.97; if(Math.abs(bola.vx)<0.2) bola.vx=0; if(Math.abs(bola.vy)<0.2) bola.vy=0; }
+  // Pantul dinding atas bawah
+  if(bola.y<10||bola.y>H-10) bola.vy*=-1;
+  // Rebut bola kalo deket pemain aktif
+  if(!bola.pemilik && Math.hypot(bola.x-pemainAktif.x,bola.y-pemainAktif.y)<28) bola.pemilik=pemainAktif;
+  // GOL
+  if(bola.x>W-15 && bola.y>H/2-70 && bola.y<H/2+70){ skorA++; document.getElementById('skor').innerText=skorA+' - '+skorB; alert('GOOOAL! RTX FC Cetak Gol! 🔥'); resetBola(); }
+  if(bola.x<15 && bola.y>H/2-70 && bola.y<H/2+70){ skorB++; document.getElementById('skor').innerText=skorA+' - '+skorB; alert('Kebobolan! Ayo balas! 😭'); resetBola(); }
+  if(bola.x<0) bola.x=0; if(bola.x>W) bola.x=W;
 
-  document.getElementById('finalScore').innerText = `Skor Akhir: ${score}`;
-  document.getElementById('pesan').innerText = alasan;
-  document.getElementById('over').style.display = 'flex';
+  // Auto ganti pemain aktif ke yang paling deket bola pas bertahan
+  if(!bola.pemilik || (bola.pemilik && bola.pemilik.tim==='musuh')){
+    let best=pemain[0], bd=1e9; pemain.forEach(p=>{let d=Math.hypot(bola.x-p.x,bola.y-p.y); if(d<bd){bd=d;best=p;}});
+    if(bd<150) pemainAktif=best;
+  }
+
+  // --- GAMBAR LAPANGAN ---
+  ctx.fillStyle='#2e9e4f'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=2;
+  ctx.strokeRect(20,20,W-40,H-40);
+  ctx.beginPath(); ctx.moveTo(W/2,20); ctx.lineTo(W/2,H-20); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2,H/2,70,0,Math.PI*2); ctx.stroke();
+  // Gawang
+  ctx.fillStyle='#fff'; ctx.fillRect(W-20,H/2-70,20,140); ctx.fillRect(0,H/2-70,20,140);
+  ctx.fillStyle='#00ff88'; ctx.fillRect(0,H/2-70,5,140); ctx.fillStyle='#ff4444'; ctx.fillRect(W-5,H/2-70,5,140);
+  // Bola
+  ctx.font='26px Arial'; ctx.fillText('⚽',bola.x-10,bola.y+10);
+  // Pemain
+  function gambar(p,warna){
+    ctx.beginPath(); ctx.arc(p.x,p.y,16,0,Math.PI*2); ctx.fillStyle=warna; ctx.fill(); ctx.strokeStyle='#fff'; ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font='bold 11px Arial'; ctx.textAlign='center'; ctx.fillText(p.no,p.x,p.y+4);
+    if(p===pemainAktif){ ctx.beginPath(); ctx.arc(p.x,p.y,22,0,Math.PI*2); ctx.strokeStyle='#ffcc00'; ctx.lineWidth=2; ctx.stroke(); ctx.fillStyle='#ffcc00'; ctx.fillText('▼',p.x,p.y-28); }
+  }
+  pemain.forEach(p=>gambar(p,'#00ff88'));
+  musuh.forEach(p=>gambar(p,'#ff4444'));
+  // Nama strategi jalan
+  ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(10,H-30,220,20); ctx.fillStyle='#fff'; ctx.font='12px Arial'; ctx.textAlign='left'; ctx.fillText('AI: Temenmu lagi buka ruang & pressing...',15,H-16);
+
+  requestAnimationFrame(loop);
 }
 </script>
-
 </body>
 </html>
