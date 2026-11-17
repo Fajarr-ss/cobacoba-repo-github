@@ -2,258 +2,382 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>EFOOTBALL 2D - RTX FC</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Listrik Statis - Mirip PhET</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#0a1a0a;color:#fff;overflow:hidden}
-#menu{position:absolute;inset:0;background:linear-gradient(180deg,#0a2a12,#000);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:20;text-align:center}
-#menu h1{font-size:34px;color:#00ff88;text-shadow:0 0 20px #00ff88}
-#menu p{color:#ccc;margin:8px 0 18px}
-.card{background:#16281a;border:1px solid #2a4a30;border-radius:15px;padding:15px;width:100%;max-width:420px;margin-bottom:12px;text-align:left}
-.card h3{color:#ffcc00;margin-bottom:8px;font-size:15px}
-select,button{width:100%;padding:12px;border-radius:10px;border:none;font-size:15px;font-weight:bold;margin-top:6px}
-select{background:#222;color:#fff}
-.btnMain{background:#00ff88;color:#000;font-size:18px;cursor:pointer}
-.row{display:flex;gap:8px}
-.row button{flex:1;background:#333;color:#fff}
-.row button.aktif{background:#00ff88;color:#000}
-#hud{position:absolute;top:0;left:0;right:0;display:none;justify-content:space-between;padding:8px 12px;background:rgba(0,0,0,.7);z-index:10;font-weight:bold}
-#skor{font-size:22px;color:#ffcc00}
-#waktu{font-size:14px}
-canvas{width:100vw;height:100vh;display:block;background:#2e9e4f}
-#kontrol{position:absolute;bottom:15px;left:0;right:0;display:none;justify-content:space-between;padding:0 15px;z-index:10}
-#joy{width:120px;height:120px;background:rgba(255,255,255,.15);border-radius:50%;position:relative;border:2px solid rgba(255,255,255,.4)}
-#stick{width:50px;height:50px;background:#fff;border-radius:50%;position:absolute;left:35px;top:35px}
-.tombol{width:65px;height:65px;border-radius:50%;border:none;font-weight:bold;font-size:13px;color:#fff}
-#pass{background:#2196f3}#shoot{background:#ff4444}#sprint{background:#ffcc00;color:#000}
-#infoTaktik{position:absolute;top:45px;left:10px;background:rgba(0,0,0,.6);padding:6px 10px;border-radius:10px;font-size:12px;z-index:10;display:none}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:#f0f0f0;overflow:hidden}
+#wrap{max-width:900px;margin:0 auto;background:#fff;height:100dvh;display:flex;flex-direction:column}
+header{background:#1e88e5;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:18px}
+header p{font-size:11px;opacity:.9}
+header span{background:rgba(255,255,255,.2);padding:4px 8px;border-radius:99px;font-size:11px}
+#stage{position:relative;flex:1;background:linear-gradient(#e3f2fd,#fff);overflow:hidden;touch-action:none}
+#canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.kontrol{background:#fff;border-top:1px solid #ddd;padding:10px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
+.btn{padding:9px 14px;border:1px solid #ddd;border-radius:99px;background:#fff;font-weight:700;font-size:13px;cursor:pointer}
+.btn.aktif{background:#1e88e5;color:#fff;border-color:#1e88e5}
+.btn.orange{background:#ff9800;color:#000;border-color:#ff9800}
+.btn.merah{background:#ff5252;color:#fff;border-color:#ff5252}
+.label{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.switch{width:40px;height:22px;background:#ccc;border-radius:99px;position:relative;cursor:pointer}
+.switch.on{background:#1e88e5}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:.2s}
+.switch.on::after{left:20px}
+.info{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:8px;pointer-events:none;z-index:5}
+.kartu{flex:1;background:rgba(255,255,255,.9);border-radius:12px;padding:8px 10px;box-shadow:0 2px 8px rgba(0,0,0,.1);text-align:center}
+.kartu b{font-size:14px;display:block}
+.kartu span{font-size:11px;color:#666}
+#pesan{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:10px 16px;border-radius:99px;font-size:13px;font-weight:700;z-index:10;pointer-events:none;white-space:nowrap}
+#penjelasan{background:#fff3e0;border-top:1px solid #ffcc80;padding:10px 14px;font-size:12px;line-height:1.6}
+#penjelasan b{color:#e65100}
+.hilang{display:none}
+@media(max-width:600px){header h1{font-size:15px}header p{display:none}}
 </style>
 </head>
 <body>
+<div id="wrap">
+<header>
+  <div><h1>⚡ Listrik Statis</h1><p>Balon & Sweater • Mirip PhET Interactive Simulations</p></div>
+  <span>PhET STYLE • GRATIS</span>
+</header>
 
-<div id="menu">
-  <h1>⚽ EFOOTBALL 2D</h1>
-  <p>RTX FC vs BOM FC • Tim-mu kerjasama otomatis koyo pro</p>
-  <div class="card">
-    <h3>1. PILIH FORMASI TIM-MU</h3>
-    <div class="row" id="formasiBtn">
-      <button class="aktif" onclick="pilihFormasi(this,'4-4-2')">4-4-2</button>
-      <button onclick="pilihFormasi(this,'4-3-3')">4-3-3</button>
-      <button onclick="pilihFormasi(this,'3-5-2')">3-5-2</button>
-      <button onclick="pilihFormasi(this,'5-3-2')">5-3-2</button>
-    </div>
-    <h3 style="margin-top:12px">2. STRATEGI / MENTALITAS</h3>
-    <div class="row" id="mentalBtn">
-      <button onclick="pilihMental(this,'bertahan')">🛡️ Bertahan</button>
-      <button class="aktif" onclick="pilihMental(this,'seimbang')">⚖️ Seimbang</button>
-      <button onclick="pilihMental(this,'menyerang')">🔥 Menyerang</button>
-    </div>
-    <h3 style="margin-top:12px">3. GAYA MAIN</h3>
-    <select id="gaya">
-      <option value="tiki">Tiki-Taka - Umpan Pendek Cepet</option>
-      <option value="counter">Counter Attack - Lari Kenceng Pas Rebut Bola</option>
-      <option value="long">Long Ball - Umpan Jauh Langsung Nyerang</option>
-    </select>
+<div id="stage">
+  <canvas id="canvas"></canvas>
+  <div class="info">
+    <div class="kartu"><b id="balonMuatan">Netral</b><span>🎈 BALON</span></div>
+    <div class="kartu"><b id="sweaterMuatan">Netral</b><span>🧶 SWEATER</span></div>
+    <div class="kartu"><b id="dindingMuatan">Netral</b><span>🧱 DINDING</span></div>
+    <div class="kartu"><b id="elektronPindah">0</b><span>ELEKTRON PINDAH</span></div>
   </div>
-  <button class="btnMain" onclick="mulai()">▶️ KICK OFF!</button>
-  <p style="font-size:12px">PC: WASD Gerak • J Umpan • K Tembak • L Sprint<br>HP: Joystick kiri + Tombol kanan</p>
+  <div id="pesan">👆 Seret balon ke sweater, gosok-gosok!</div>
 </div>
 
-<div id="hud"><div>RTX FC <span id="skor">0 - 0</span> BOM FC</div><div id="waktu">90:00</div><div id="taktikHud">4-4-2 • Seimbang</div></div>
-<div id="infoTaktik"></div>
-<canvas id="game"></canvas>
+<div class="kontrol">
+  <label class="label"><div class="switch on" id="swMuatan" onclick="toggleMuatan()"></div> Tampilkan Semua Muatan</label>
+  <label class="label"><div class="switch on" id="swElektron" onclick="toggleElektron()"></div> Tampilkan Elektron</label>
+  <button class="btn" onclick="tambahBalon()">🎈 + Balon</button>
+  <button class="btn" onclick="tambahSweater()">🧶 + Sweater</button>
+  <button class="btn orange" onclick="resetSim()">🔄 Reset</button>
+  <button class="btn merah" onclick="lepasBalon()">🎈 Lepas Balon</button>
+</div>
 
-<div id="kontrol">
-  <div id="joy"><div id="stick"></div></div>
-  <div style="display:flex;gap:10px;align-items:end">
-    <button class="tombol" id="pass">UMPAN</button>
-    <button class="tombol" id="shoot">TEMBAK</button>
-    <button class="tombol" id="sprint">SPRINT</button>
-  </div>
+<div id="penjelasan">
+  <b>🎓 PENJELASAN - Kenapa iso nempel?</b><br>
+    1. Awal-e balon & sweater <b>netral</b> (jumlah + = -).<br>
+    2. Nek balon digosok neng sweater, <b>elektron ( - ) pindah</b> dari sweater ke balon. Balon dadi <b>negatif</b>, sweater dadi <b>positif</b>.<br>
+    3. Balon negatif didekke dinding → elektron neng dinding menjauh (tolak-menolak), proton mendekat (tarik-menarik). Iki jenenge <b>INDUKSI</b>. Balon nempel!<br>
+    4. Muatan sejenis <b>tolak-menolak</b> (- tolak -), muatan beda jenis <b>tarik-menarik</b> (+ tarik -).
+</div>
 </div>
 
 <script>
-const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
-let W,H; function rs(){W=canvas.width=innerWidth;H=canvas.height=innerHeight} addEventListener('resize',rs); rs();
+let cv=document.getElementById('canvas');
+let ctx=cv.getContext('2d');
+let W,H;
+function resize(){ W=cv.width=cv.offsetWidth*devicePixelRatio; H=cv.height=cv.offsetHeight*devicePixelRatio; }
+window.addEventListener('resize',resize); resize();
 
-let formasi='4-4-2', mental='seimbang', gaya='tiki';
-let pemain=[], musuh=[], bola, skorA=0, skorB=0, menit=0, detik=0, gameJalan=false, pemainAktif=null, keys={}, joyX=0, joyY=0, sprint=false;
+// ===== STATE - mirip PhET =====
+let showMuatan=true, showElektron=true;
+let sweater={x:0.28, y:0.55, w:0.28, h:0.42, elektron:12, proton:12, charges:[]};
+let dinding={x:0.92, y:0.5, w:0.08, h:0.85, elektron:[], proton:[]};
+let balons=[
+  {x:0.62, y:0.35, r:0.075, elektron:8, proton:8, drag:false, nempel:false, vx:0, vy:0, warna:'#ffeb3b', nama:'Balon Kuning'}
+];
+let elektronTerbang=[]; // elektron yang lagi pindah
+let pesanTimer=null;
 
-function pilihFormasi(el,f){formasi=f; document.querySelectorAll('#formasiBtn button').forEach(b=>b.classList.remove('aktif')); el.classList.add('aktif');}
-function pilihMental(el,m){mental=m; document.querySelectorAll('#mentalBtn button').forEach(b=>b.classList.remove('aktif')); el.classList.add('aktif');}
+function initCharges(){
+  // Sweater charges - acak posisi
+  sweater.charges=[];
+  for(let i=0;i<12;i++) sweater.charges.push({x:Math.random(), y:Math.random(), type:'+', id:i});
+  for(let i=0;i<12;i++) sweater.charges.push({x:Math.random(), y:Math.random(), type:'-', id:100+i});
+  // Dinding charges
+  dinding.elektron=[]; dinding.proton=[];
+  for(let i=0;i<14;i++) dinding.proton.push({x:Math.random(), y:Math.random()});
+  for(let i=0;i<14;i++) dinding.elektron.push({x:Math.random(), y:Math.random(), offsetX:0});
+}
+initCharges();
 
-const FORMASI={
- '4-4-2':[{x:.08,y:.5},{x:.25,y:.2},{x:.25,y:.4},{x:.25,y:.6},{x:.25,y:.8},{x:.45,y:.2},{x:.45,y:.4},{x:.45,y:.6},{x:.45,y:.8},{x:.68,y:.35},{x:.68,y:.65}],
- '4-3-3':[{x:.08,y:.5},{x:.25,y:.2},{x:.25,y:.4},{x:.25,y:.6},{x:.25,y:.8},{x:.45,y:.35},{x:.45,y:.5},{x:.45,y:.65},{x:.68,y:.2},{x:.72,y:.5},{x:.68,y:.8}],
- '3-5-2':[{x:.08,y:.5},{x:.25,y:.25},{x:.25,y:.5},{x:.25,y:.75},{x:.45,y:.15},{x:.45,y:.35},{x:.45,y:.5},{x:.45,y:.65},{x:.45,y:.85},{x:.68,y:.35},{x:.68,y:.65}],
- '5-3-2':[{x:.08,y:.5},{x:.25,y:.1},{x:.25,y:.3},{x:.25,y:.5},{x:.25,y:.7},{x:.25,y:.9},{x:.45,y:.35},{x:.45,y:.5},{x:.45,y:.65},{x:.68,y:.35},{x:.68,y:.65}]
-};
-function buatTim(isMusuh){
-  let arr=[]; let f=FORMASI[formasi];
-  for(let i=0;i<11;i++){
-    let pos=f[i];
-    let x = isMusuh ? W-(pos.x*W) : pos.x*W;
-    // Mental ngaruh posisi awal: menyerang maju, bertahan mundur
-    if(!isMusuh && mental==='menyerang') x+=40;
-    if(!isMusuh && mental==='bertahan') x-=40;
-    arr.push({x,y:pos.y*H, homeX:x, homeY:pos.y*H, vx:0, vy:0, speed:2.2+Math.random()*0.6, tim:isMusuh?'musuh':'kita', no:i+1, stamina:100});
-  }
-  return arr;
+function showPesan(teks){
+  let p=document.getElementById('pesan');
+  p.innerText=teks; p.classList.remove('hilang');
+  clearTimeout(pesanTimer);
+  pesanTimer=setTimeout(()=>p.classList.add('hilang'), 3500);
 }
-function mulai(){
-  formasi=document.querySelector('#formasiBtn .aktif').innerText;
-  gaya=document.getElementById('gaya').value;
-  document.getElementById('menu').style.display='none';
-  document.getElementById('hud').style.display='flex';
-  document.getElementById('kontrol').style.display='flex';
-  document.getElementById('infoTaktik').style.display='block';
-  document.getElementById('taktikHud').innerText=formasi+' • '+mental;
-  document.getElementById('infoTaktik').innerHTML='🧠 Strategi: '+formasi+' | '+mental+' | '+gaya+'<br>Pemain AI lagi kerjasama...';
-  pemain=buatTim(false); musuh=buatTim(true);
-  bola={x:W/2,y:H/2,vx:0,vy:0,pemilik:null};
-  pemainAktif=pemain[5]; gameJalan=true;
-  requestAnimationFrame(loop);
-  setInterval(()=>{ if(gameJalan){ detik++; if(detik>=60){detik=0;menit++;} let m=String(Math.min(90,menit)).padStart(2,'0'); document.getElementById('waktu').innerText=m+':'+String(detik).padStart(2,'0'); if(menit>=2){ gameJalan=false; alert('FT: RTX FC '+skorA+' - '+skorB+' BOM FC\n'+(skorA>skorB?'MENANG! GG 🔥':'Coba lagi mas 😅')); location.reload(); } } },1000);
+function toggleMuatan(){
+  showMuatan=!showMuatan;
+  document.getElementById('swMuatan').classList.toggle('on', showMuatan);
 }
-
-// Kontrol
-addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true; if(e.key.toLowerCase()==='j') umpan(); if(e.key.toLowerCase()==='k') tembak(); if(e.key.toLowerCase()==='l') sprint=true;});
-addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false; if(e.key.toLowerCase()==='l') sprint=false;});
-let joy=document.getElementById('joy'), stick=document.getElementById('stick'), joyAktif=false;
-joy.addEventListener('touchstart',e=>{joyAktif=true});
-joy.addEventListener('touchmove',e=>{let r=joy.getBoundingClientRect(); let t=e.touches[0]; joyX=(t.clientX-(r.left+60))/60; joyY=(t.clientY-(r.top+60))/60; let l=Math.max(-1,Math.min(1,joyX)), tt=Math.max(-1,Math.min(1,joyY)); stick.style.left=(35+l*25)+'px'; stick.style.top=(35+tt*25)+'px';});
-joy.addEventListener('touchend',()=>{joyX=0;joyY=0;stick.style.left='35px';stick.style.top='35px';});
-document.getElementById('pass').addEventListener('touchstart',umpan);
-document.getElementById('shoot').addEventListener('touchstart',tembak);
-document.getElementById('sprint').addEventListener('touchstart',()=>sprint=true);
-document.getElementById('sprint').addEventListener('touchend',()=>sprint=false);
-
-function cariTemanTerdekat(p){
-  let best=null, bd=1e9;
-  pemain.forEach(t=>{ if(t===p) return; let d=Math.hypot(t.x-p.x,t.y-p.y); if(d<bd){bd=d;best=t;} });
-  return best;
+function toggleElektron(){
+  showElektron=!showElektron;
+  document.getElementById('swElektron').classList.toggle('on', showElektron);
 }
-function umpan(){
-  if(!bola.pemilik || bola.pemilik.tim!=='kita') return;
-  let p=bola.pemilik; let target=cariTemanTerdekat(p);
-  // Gaya Long Ball: umpan jauh ke depan
-  if(gaya==='long'){ target=pemain.reduce((a,b)=> (b.x>a.x?b:a)); }
-  // Gaya Tiki: umpan ke teman paling deket + buka ruang
-  bola.pemilik=null; let dx=target.x-p.x, dy=target.y-p.y, d=Math.hypot(dx,dy)||1;
-  bola.vx=dx/d*11; bola.vy=dy/d*11;
-  // Temen langsung lari nyambut bola (kerjasama!)
-  target.homeX=target.x+dx*0.2; target.homeY=target.y+dy*0.2;
+function tambahBalon(){
+  if(balons.length>=2){ showPesan('Maksimal 2 balon, kaya PhET!'); return; }
+  balons.push({x:0.62, y:0.65, r:0.075, elektron:8, proton:8, drag:false, nempel:false, vx:0, vy:0, warna:'#ff80ab', nama:'Balon Pink'});
+  showPesan('🎈 Balon baru ditambahkan!');
 }
-function tembak(){
-  if(!bola.pemilik || bola.pemilik.tim!=='kita') return;
-  let p=bola.pemilik; bola.pemilik=null;
-  let gx=W-10, gy=H/2; let dx=gx-p.x, dy=gy-p.y, d=Math.hypot(dx,dy)||1;
-  bola.vx=dx/d*16; bola.vy=dy/d*16 + (Math.random()-.5)*3;
+function tambahSweater(){ showPesan('🧶 Di PhET cuma 1 sweater, tapi bisa gosok 2 balon!'); }
+function lepasBalon(){
+  balons.forEach(b=>{ b.nempel=false; b.vx=(Math.random()-0.5)*2; b.vy=-1; });
+  showPesan('🎈 Balon dilepas! Delok balon-e mabur...');
 }
-function resetBola(keKiri){
-  bola={x:W/2,y:H/2,vx:0,vy:0,pemilik:null};
-  pemain.forEach(p=>{p.x=p.homeX;p.y=p.homeY}); musuh.forEach(p=>{p.x=p.homeX;p.y=p.homeY});
+function resetSim(){
+  balons=[{x:0.62, y:0.35, r:0.075, elektron:8, proton:8, drag:false, nempel:false, vx:0, vy:0, warna:'#ffeb3b', nama:'Balon Kuning'}];
+  elektronTerbang=[];
+  initCharges();
+  showPesan('🔄 Reset! Balon & sweater balik netral.');
+  updateInfo();
 }
 
-function loop(){
-  if(!gameJalan) return;
-  // --- GERAK PEMAIN KITA YANG DIKONTROL ---
-  let dx=0, dy=0;
-  if(keys['w']||keys['arrowup']) dy-=1; if(keys['s']||keys['arrowdown']) dy+=1;
-  if(keys['a']||keys['arrowleft']) dx-=1; if(keys['d']||keys['arrowright']) dx+=1;
-  dx+=joyX; dy+=joyY;
-  let dl=Math.hypot(dx,dy)||1; if(dl>0.1){ dx/=dl; dy/=dl; }
-  let spd = sprint?5.5:3.8;
-  pemainAktif.x+=dx*spd; pemainAktif.y+=dy*spd;
-
-  // --- AI TEMEN SETIM: KERJASAMA ---
-  pemain.forEach(p=>{
-    if(p===pemainAktif) return;
-    // Target posisi = home + bola influence + strategi
-    let targetX=p.homeX, targetY=p.homeY;
-    let bolaFactor = mental==='menyerang'?0.45 : mental==='bertahan'?0.18 : 0.30;
-    // Kalo tim pegang bola, temen lari maju buka ruang. Kalo musuh pegang bola, temen mundur pressing
-    if(bola.pemilik && bola.pemilik.tim==='kita'){ targetX = p.homeX + (bola.x-p.homeX)*bolaFactor + 30; }
-    else if(bola.pemilik && bola.pemilik.tim==='musuh'){ targetX = p.homeX - 20; }
-    else { targetX = p.homeX + (bola.x-p.homeX)*0.25; }
-    // Gaya Counter: pas rebut bola, semua lari kenceng ke depan
-    if(gaya==='counter' && bola.pemilik && bola.pemilik.tim==='kita') targetX+=60;
-    // Gaya Tiki: jaga jarak, jangan numpuk
-    if(gaya==='tiki') targetY = p.homeY + Math.sin(Date.now()/1000 + p.no)*10;
-    let ddx=targetX-p.x, ddy=targetY-p.y, dd=Math.hypot(ddx,ddy);
-    if(dd>5){ p.x+=ddx/dd*p.speed*0.7; p.y+=ddy/dd*p.speed*0.7; }
-    // Kalo bola lepas deket dia, dia ambil
-    if(!bola.pemilik && Math.hypot(bola.x-p.x,bola.y-p.y)<25 && p!==pemainAktif){
-      // Rebut otomatis, tapi yang paling deket jadi aktif
-      let jarakAktif=Math.hypot(bola.x-pemainAktif.x,bola.y-pemainAktif.y);
-      if(Math.hypot(bola.x-p.x,bola.y-p.y) < jarakAktif) pemainAktif=p;
+// ===== INTERAKSI - DRAG BALON =====
+let dragBalon=null, offsetX=0, offsetY=0;
+function getPos(e){
+  let rect=cv.getBoundingClientRect();
+  let cx=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+  let cy=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
+  return {x:cx/rect.width, y:cy/rect.height};
+}
+cv.addEventListener('touchstart', mulaiDrag, {passive:false});
+cv.addEventListener('mousedown', mulaiDrag);
+function mulaiDrag(e){
+  e.preventDefault();
+  let p=getPos(e);
+  for(let i=balons.length-1;i>=0;i--){
+    let b=balons[i];
+    let dx=p.x-b.x, dy=p.y-b.y;
+    if(Math.sqrt(dx*dx+dy*dy)<b.r+0.04){
+      dragBalon=b; b.drag=true; b.nempel=false;
+      offsetX=dx; offsetY=dy;
+      showPesan('🎈 Balon dipegang! Gosok ke sweater...');
+      break;
     }
-  });
-
-  // --- AI MUSUH ---
-  musuh.forEach(m=>{
-    let tx=m.homeX, ty=m.homeY;
-    if(bola.pemilik && bola.pemilik.tim==='kita'){ tx=m.homeX-30; } // musuh mundur / pressing
-    if(!bola.pemilik){ tx=m.homeX+(bola.x-m.homeX)*0.3; ty=m.homeY+(bola.y-m.homeY)*0.3; }
-    if(bola.pemilik && bola.pemilik.tim==='musuh' && bola.pemilik===m){
-      // Musuh bawa bola nyerang ke kiri
-      m.x-=2.5; m.y+=(H/2-m.y)*0.01;
-      if(m.x<120 && Math.random()<0.02){ bola.pemilik=null; bola.vx=-12; bola.vy=(Math.random()-.5)*4; } // musuh nembak
-      if(Math.random()<0.005){ // musuh umpan ke temen
-        let t=musuh[Math.floor(Math.random()*musuh.length)];
-        bola.pemilik=null; bola.vx=(t.x-m.x)*0.1; bola.vy=(t.y-m.y)*0.1;
+  }
+}
+cv.addEventListener('touchmove', gerakDrag, {passive:false});
+cv.addEventListener('mousemove', gerakDrag);
+function gerakDrag(e){
+  if(!dragBalon) return;
+  e.preventDefault();
+  let p=getPos(e);
+  let oldX=dragBalon.x, oldY=dragBalon.y;
+  dragBalon.x=Math.max(0.08, Math.min(0.92, p.x-offsetX));
+  dragBalon.y=Math.max(0.18, Math.min(0.88, p.y-offsetY));
+  // Gerakan gosok = kecepatan tinggi neng sweater = elektron pindah
+  let kecepatan=Math.abs(dragBalon.x-oldX)+Math.abs(dragBalon.y-oldY);
+  // Cek nabrak sweater
+  let sx=sweater.x, sy=sweater.y;
+  let diSweater = dragBalon.x>sx-sweater.w/2-0.05 && dragBalon.x<sx+sweater.w/2+0.05 && dragBalon.y>sy-sweater.h/2-0.05 && dragBalon.y<sy+sweater.h/2+0.05;
+  if(diSweater && kecepatan>0.002 && dragBalon.elektron<16){
+    // Gosok! Elektron pindah dari sweater ke balon
+    if(Math.random()<0.6){
+      dragBalon.elektron++;
+      // Sweater kehilangan elektron (proton tetep)
+      let idx=sweater.charges.findIndex(c=>c.type==='-');
+      if(idx!==-1){
+        let c=sweater.charges[idx];
+        sweater.charges.splice(idx,1);
+        // Animasi elektron terbang
+        elektronTerbang.push({x:sx, y:sy, tx:dragBalon.x, ty:dragBalon.y, progress:0});
+        if(navigator.vibrate) navigator.vibrate(5);
       }
-    } else {
-      let ddx=tx-m.x, ddy=ty-m.y, dd=Math.hypot(ddx,ddy);
-      if(dd>5){ m.x+=ddx/dd*m.speed*0.7; m.y+=ddy/dd*m.speed*0.7; }
+      if(dragBalon.elektron===10) showPesan('⚡ Elektron mulai pindah! Balon mulai negatif...');
+      if(dragBalon.elektron===13) showPesan('🔥 Balon wis negatif banget! Coba tempelke neng dinding!');
+      if(dragBalon.elektron>=16) showPesan('✅ Balon penuh elektron! Saiki tempelke neng dinding 🧱');
     }
-    // Musuh rebut bola
-    if(!bola.pemilik && Math.hypot(bola.x-m.x,bola.y-m.y)<22) bola.pemilik=m;
-  });
-
-  // --- BOLA ---
-  if(bola.pemilik){ bola.x=bola.pemilik.x+12; bola.y=bola.pemilik.y+10; }
-  else { bola.x+=bola.vx; bola.y+=bola.vy; bola.vx*=0.97; bola.vy*=0.97; if(Math.abs(bola.vx)<0.2) bola.vx=0; if(Math.abs(bola.vy)<0.2) bola.vy=0; }
-  // Pantul dinding atas bawah
-  if(bola.y<10||bola.y>H-10) bola.vy*=-1;
-  // Rebut bola kalo deket pemain aktif
-  if(!bola.pemilik && Math.hypot(bola.x-pemainAktif.x,bola.y-pemainAktif.y)<28) bola.pemilik=pemainAktif;
-  // GOL
-  if(bola.x>W-15 && bola.y>H/2-70 && bola.y<H/2+70){ skorA++; document.getElementById('skor').innerText=skorA+' - '+skorB; alert('GOOOAL! RTX FC Cetak Gol! 🔥'); resetBola(); }
-  if(bola.x<15 && bola.y>H/2-70 && bola.y<H/2+70){ skorB++; document.getElementById('skor').innerText=skorA+' - '+skorB; alert('Kebobolan! Ayo balas! 😭'); resetBola(); }
-  if(bola.x<0) bola.x=0; if(bola.x>W) bola.x=W;
-
-  // Auto ganti pemain aktif ke yang paling deket bola pas bertahan
-  if(!bola.pemilik || (bola.pemilik && bola.pemilik.tim==='musuh')){
-    let best=pemain[0], bd=1e9; pemain.forEach(p=>{let d=Math.hypot(bola.x-p.x,bola.y-p.y); if(d<bd){bd=d;best=p;}});
-    if(bd<150) pemainAktif=best;
   }
-
-  // --- GAMBAR LAPANGAN ---
-  ctx.fillStyle='#2e9e4f'; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=2;
-  ctx.strokeRect(20,20,W-40,H-40);
-  ctx.beginPath(); ctx.moveTo(W/2,20); ctx.lineTo(W/2,H-20); ctx.stroke();
-  ctx.beginPath(); ctx.arc(W/2,H/2,70,0,Math.PI*2); ctx.stroke();
-  // Gawang
-  ctx.fillStyle='#fff'; ctx.fillRect(W-20,H/2-70,20,140); ctx.fillRect(0,H/2-70,20,140);
-  ctx.fillStyle='#00ff88'; ctx.fillRect(0,H/2-70,5,140); ctx.fillStyle='#ff4444'; ctx.fillRect(W-5,H/2-70,5,140);
-  // Bola
-  ctx.font='26px Arial'; ctx.fillText('⚽',bola.x-10,bola.y+10);
-  // Pemain
-  function gambar(p,warna){
-    ctx.beginPath(); ctx.arc(p.x,p.y,16,0,Math.PI*2); ctx.fillStyle=warna; ctx.fill(); ctx.strokeStyle='#fff'; ctx.stroke();
-    ctx.fillStyle='#fff'; ctx.font='bold 11px Arial'; ctx.textAlign='center'; ctx.fillText(p.no,p.x,p.y+4);
-    if(p===pemainAktif){ ctx.beginPath(); ctx.arc(p.x,p.y,22,0,Math.PI*2); ctx.strokeStyle='#ffcc00'; ctx.lineWidth=2; ctx.stroke(); ctx.fillStyle='#ffcc00'; ctx.fillText('▼',p.x,p.y-28); }
+  updateInfo();
+}
+function selesaiDrag(e){
+  if(dragBalon){
+    dragBalon.drag=false;
+    // Cek nempel dinding?
+    let b=dragBalon;
+    let muatanB = b.elektron - b.proton;
+    // Dinding neng x 0.88 - 0.96
+    if(b.x>0.78 && muatanB>=3){
+      b.nempel=true;
+      b.x=0.84; // nempel dinding
+      showPesan('🎉 BALON NEMPEL NENG DINDING! Induksi berhasil! (Muatan - narik + neng dinding)');
+    }else if(b.x>0.78 && muatanB<3){
+      showPesan('❌ Balon durung cukup negatif. Gosok dulu neng sweater sampe 5+ elektron pindah!');
+      b.vx=-1;
+    }
+    dragBalon=null;
   }
-  pemain.forEach(p=>gambar(p,'#00ff88'));
-  musuh.forEach(p=>gambar(p,'#ff4444'));
-  // Nama strategi jalan
-  ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(10,H-30,220,20); ctx.fillStyle='#fff'; ctx.font='12px Arial'; ctx.textAlign='left'; ctx.fillText('AI: Temenmu lagi buka ruang & pressing...',15,H-16);
+}
+cv.addEventListener('touchend', selesaiDrag);
+cv.addEventListener('mouseup', selesaiDrag);
+cv.addEventListener('mouseleave', selesaiDrag);
 
+function updateInfo(){
+  let b=balons[0];
+  let muatanB=b.elektron-b.proton;
+  let balonTxt = muatanB===0 ? 'Netral (0)' : muatanB>0 ? 'Negatif (-'+muatanB+')' : 'Positif (+'+Math.abs(muatanB)+')';
+  document.getElementById('balonMuatan').innerText=balonTxt;
+  document.getElementById('balonMuatan').style.color = muatanB>0 ? '#1565c0' : muatanB<0 ? '#c62828' : '#000';
+  let sweaterMinus=sweater.charges.filter(c=>c.type==='-').length;
+  let sweaterPlus=sweater.charges.filter(c=>c.type==='+').length;
+  let sweaterMuatan=sweaterPlus-sweaterMinus;
+  let sweaterTxt = sweaterMuatan===0 ? 'Netral (0)' : sweaterMuatan>0 ? 'Positif (+'+sweaterMuatan+')' : 'Negatif';
+  document.getElementById('sweaterMuatan').innerText=sweaterTxt;
+  document.getElementById('sweaterMuatan').style.color = sweaterMuatan>0 ? '#c62828' : '#000';
+  document.getElementById('dindingMuatan').innerText='Netral (Induksi)';
+  document.getElementById('elektronPindah').innerText=(b.elektron-8);
+}
+
+// ===== GAMBAR =====
+function gambar(){
+  ctx.clearRect(0,0,W,H);
+  // Lantai
+  ctx.fillStyle='#e8e8e8'; ctx.fillRect(0,H*0.92,W,H*0.08);
+  ctx.fillStyle='#999'; ctx.font='12px Arial'; ctx.textAlign='center';
+  // Sweater
+  let sx=sweater.x*W, sy=sweater.y*H, sw=sweater.w*W, sh=sweater.h*H;
+  ctx.fillStyle='#ffcc80'; ctx.fillRect(sx-sw/2, sy-sh/2, sw, sh);
+  ctx.fillStyle='#ef6c00'; ctx.fillRect(sx-sw/2, sy-sh/2, sw, 8);
+  ctx.fillStyle='#ef6c00'; ctx.fillRect(sx-sw/2, sy+sh/2-8, sw, 8);
+  // Pola sweater
+  ctx.strokeStyle='rgba(0,0,0,.1)'; ctx.lineWidth=1;
+  for(let i=0;i<5;i++){ ctx.beginPath(); ctx.moveTo(sx-sw/2, sy-sh/2+i*sh/5); ctx.lineTo(sx+sw/2, sy-sh/2+i*sh/5); ctx.stroke(); }
+  ctx.fillStyle='#5d4037'; ctx.font='bold 14px Arial'; ctx.textAlign='center';
+  ctx.fillText('🧶 SWEATER', sx, sy+sh/2+22);
+  // Muatan sweater
+  if(showMuatan){
+    for(let c of sweater.charges){
+      let cx=sx-sw/2 + c.x*sw;
+      let cy=sy-sh/2 + c.y*sh;
+      gambarMuatan(cx,cy,c.type,10);
+    }
+  }
+  // Dinding
+  let dx=dinding.x*W, dy=dinding.y*H, dw=dinding.w*W, dh=dinding.h*H;
+  ctx.fillStyle='#bcaaa4'; ctx.fillRect(dx-dw/2, dy-dh/2, dw, dh);
+  ctx.fillStyle='#8d6e63'; ctx.fillRect(dx-dw/2, dy-dh/2, dw, 6);
+  // Bata dinding
+  ctx.strokeStyle='rgba(0,0,0,.15)';
+  for(let i=0;i<6;i++){ ctx.beginPath(); ctx.moveTo(dx-dw/2, dy-dh/2+i*dh/6); ctx.lineTo(dx+dw/2, dy-dh/2+i*dh/6); ctx.stroke(); }
+  ctx.fillStyle='#5d4037'; ctx.font='bold 12px Arial'; ctx.textAlign='center';
+  ctx.fillText('🧱', dx, dy-dh/2-10);
+  ctx.fillText('DINDING', dx, dy+dh/2+18);
+  // Muatan dinding - induksi: nek ono balon nempel, elektron menjauh
+  if(showMuatan){
+    let adaBalonNempel=balons.some(b=>b.nempel);
+    for(let i=0;i<dinding.proton.length;i++){
+      let p=dinding.proton[i];
+      let px=dx-dw/2 + p.x*dw;
+      let py=dy-dh/2 + p.y*dh;
+      // Nek balon nempel, proton mendekat ke kiri (ke balon)
+      if(adaBalonNempel) px-=8;
+      gambarMuatan(px,py,'+',9);
+    }
+    for(let i=0;i<dinding.elektron.length;i++){
+      let e=dinding.elektron[i];
+      let ex=dx-dw/2 + e.x*dw;
+      let ey=dy-dh/2 + e.y*dh;
+      // Nek balon nempel, elektron menjauh ke kanan (tolak-menolak)
+      if(adaBalonNempel) ex+=10;
+      gambarMuatan(ex,ey,'-',9);
+    }
+  }
+  // Elektron terbang (animasi pindah)
+  for(let i=elektronTerbang.length-1;i>=0;i--){
+    let e=elektronTerbang[i];
+    e.progress+=0.06;
+    if(e.progress>=1){ elektronTerbang.splice(i,1); continue; }
+    let x=e.x + (e.tx-e.x)*e.progress;
+    let y=e.y + (e.ty-e.y)*e.progress;
+    gambarMuatan(x*W, y*H, '-', 12);
+  }
+  // Balon-balons
+  for(let b of balons){
+    // Tali balon
+    ctx.strokeStyle='#666'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(b.x*W, (b.y+b.r)*H); ctx.lineTo(b.x*W, (b.y+b.r+0.12)*H); ctx.stroke();
+    // Balon
+    let bx=b.x*W, by=b.y*H, br=b.r*W;
+    // Bayangan
+    ctx.fillStyle='rgba(0,0,0,.15)'; ctx.beginPath(); ctx.ellipse(bx+6, by+br+4, br*0.8, 6, 0, 0, Math.PI*2); ctx.fill();
+    // Badan balon
+    let grad=ctx.createRadialGradient(bx-br*0.3, by-br*0.3, br*0.1, bx, by, br*1.2);
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(0.3, b.warna);
+    grad.addColorStop(1, b.warna);
+    ctx.fillStyle=grad;
+    ctx.beginPath(); ctx.ellipse(bx, by, br, br*1.15, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.stroke();
+    // Kilau
+    ctx.fillStyle='rgba(255,255,255,.7)'; ctx.beginPath(); ctx.ellipse(bx-br*0.35, by-br*0.4, br*0.18, br*0.3, -0.4, 0, Math.PI*2); ctx.fill();
+    // Mulut balon
+    ctx.fillStyle=b.warna; ctx.fillRect(bx-6, by+br*1.1, 12, 8);
+    // Muatan balon
+    if(showMuatan){
+      let total=b.elektron+b.proton;
+      for(let i=0;i<b.elektron;i++){
+        let ang=(i/b.elektron)*Math.PI*2;
+        let px=bx+Math.cos(ang)*br*0.6;
+        let py=by+Math.sin(ang)*br*0.6;
+        gambarMuatan(px,py,'-',9);
+      }
+      for(let i=0;i<b.proton;i++){
+        let ang=(i/b.proton)*Math.PI*2 + 0.4;
+        let px=bx+Math.cos(ang)*br*0.35;
+        let py=by+Math.sin(ang)*br*0.35;
+        gambarMuatan(px,py,'+',9);
+      }
+    }
+    // Label
+    ctx.fillStyle='#000'; ctx.font='bold 11px Arial'; ctx.textAlign='center';
+    let muatan=b.elektron-b.proton;
+    let label = muatan===0 ? 'NETRAL' : muatan>0 ? 'NEGATIF -'+muatan : 'POSITIF';
+    ctx.fillText(b.nama, bx, by-br*1.35);
+    ctx.fillStyle= muatan>0 ? '#1565c0' : '#000';
+    ctx.fillText(label, bx, by+4);
+    if(b.nempel){
+      ctx.fillStyle='#00e676'; ctx.font='bold 11px Arial';
+      ctx.fillText('✅ NEMPEL!', bx, by+br*1.35);
+    }
+  }
+  // Panah petunjuk awal
+  if(balons[0].elektron===8){
+    ctx.strokeStyle='#1e88e5'; ctx.lineWidth=2; ctx.setLineDash([6,4]);
+    ctx.beginPath(); ctx.moveTo(balons[0].x*W, balons[0].y*H+50); ctx.lineTo(sweater.x*W, sweater.y*H); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#1e88e5'; ctx.font='bold 12px Arial'; ctx.textAlign='center';
+    ctx.fillText('← SERET KE SWEATER & GOSOK!', (balons[0].x+sweater.x)/2*W, (balons[0].y+sweater.y)/2*H-10);
+  }
+}
+function gambarMuatan(x,y,type,r){
+  if(type==='+'){
+    ctx.fillStyle='#ff5252'; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(x-r*0.5,y); ctx.lineTo(x+r*0.5,y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,y-r*0.5); ctx.lineTo(x,y+r*0.5); ctx.stroke();
+  }else{
+    ctx.fillStyle='#1565c0'; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(x-r*0.5,y); ctx.lineTo(x+r*0.5,y); ctx.stroke();
+  }
+  ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke();
+}
+function loop(){
+  // Fisika ringan: balon sing ora di-drag, mabur alon-alon ke posisi awal nek ora nempel
+  for(let b of balons){
+    if(!b.drag && !b.nempel){
+      // Gravitasi ringan + balik ke tengah
+      b.vy = (b.vy||0)*0.98 + 0.001;
+      b.y+=b.vy*0.2;
+      if(b.y>0.85) b.y=0.85;
+    }
+  }
+  gambar();
   requestAnimationFrame(loop);
 }
+updateInfo();
+loop();
 </script>
 </body>
-</html>
+  </html>
