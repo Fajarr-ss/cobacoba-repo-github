@@ -1,391 +1,2466 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rangkaian Listrik Dinamis & Statis - PhET Style</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:#f0f0f0}
-#wrap{max-width:1000px;margin:0 auto;background:#fff;min-height:100vh;display:flex;flex-direction:column}
-header{background:#1565c0;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-header h1{font-size:19px}
-header p{font-size:12px;opacity:.9}
-.tabs{display:flex;background:#0d47a1}
-.tab{flex:1;padding:12px;text-align:center;color:rgba(255,255,255,.7);font-weight:800;cursor:pointer;font-size:14px}
-.tab.aktif{background:#fff;color:#1565c0;border-radius:12px 12px 0 0;margin-top:4px}
-#stage{position:relative;flex:1;min-height:520px;background:#f9f9f9;overflow:hidden}
-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
-.panel{background:#fff;border-top:1px solid #ddd;padding:12px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
-.kartu{background:#f5f5f5;border:1px solid #ddd;border-radius:12px;padding:10px;min-width:160px;flex:1}
-.kartu b{font-size:13px;display:block;margin-bottom:6px}
-.kartu small{font-size:11px;color:#666}
-input[type=range]{width:100%;accent-color:#1565c0}
-.nilai{font-size:18px;font-weight:900;color:#1565c0}
-.btn{padding:9px 14px;border:1px solid #ddd;border-radius:99px;background:#fff;font-weight:700;cursor:pointer;font-size:13px}
-.btn.aktif{background:#1565c0;color:#fff}
-.btn.orange{background:#ff9800;border-color:#ff9800}
-.btn.merah{background:#ff5252;color:#fff;border-color:#ff5252}
-.btn.hijau{background:#00c853;color:#fff;border-color:#00c853}
-.palet{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:10px;background:#fff3e0;border-top:1px solid #ffcc80}
-.palet div{padding:8px 12px;background:#fff;border:2px dashed #ff9800;border-radius:10px;cursor:grab;font-size:13px;font-weight:700;text-align:center}
-.palet div:active{cursor:grabbing;background:#ffe0b2}
-.palet small{display:block;font-size:10px;color:#888;font-weight:400}
-.info{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:8px;pointer-events:none;z-index:5}
-.kartuAtas{flex:1;background:rgba(255,255,255,.95);border-radius:12px;padding:8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.1)}
-.kartuAtas b{font-size:15px;display:block}
-.kartuAtas span{font-size:11px;color:#666}
-#pesan{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:10px 16px;border-radius:99px;font-size:13px;font-weight:700;z-index:20;pointer-events:none;white-space:nowrap}
-.hilang{display:none !important}
-.rumus{background:#e3f2fd;border:1px solid #90caf9;border-radius:12px;padding:10px;font-size:12px;line-height:1.7}
-.rumus b{color:#0d47a1}
-table{width:100%;border-collapse:collapse;font-size:12px}
-table td,table th{border:1px solid #ddd;padding:6px;text-align:center}
-table th{background:#1565c0;color:#fff}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulasi Listrik: Statis & Dinamis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    /* Gaya khusus untuk kanvas dan interaksi sentuh */
+    body {
+      user-select: none;
+      -webkit-user-select: none;
+      overflow-x: hidden;
+    }
+    canvas {
+      touch-action: none;
+      display: block;
+    }
+    /* Custom scrollbar ringan */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    /* Range slider styling */
+    input[type='range'] {
+      accent-color: #2563eb;
+    }
+  </style>
 </head>
-<body>
-<div id="wrap">
-<header>
-  <div><h1>⚡ Rangkaian Listrik</h1><p>Dinamis & Statis • Bisa Diubah-Ubah • Mirip PhET</p></div>
-  <span style="background:rgba(255,255,255,.2);padding:6px 10px;border-radius:99px;font-size:11px">PhET STYLE • INTERAKTIF</span>
-</header>
-<div class="tabs">
-  <div class="tab aktif" id="tabDinamis" onclick="gantiTab('dinamis')">🔌 DINAMIS - Rangkaian</div>
-  <div class="tab" id="tabStatis" onclick="gantiTab('statis')">🎈 STATIS - Balon</div>
-</div>
-
-<div id="stage">
-  <canvas id="cv"></canvas>
-  <div class="info" id="infoDinamis">
-    <div class="kartuAtas"><b id="txtArus">0.00 A</b><span>🔌 ARUS (I)</span></div>
-    <div class="kartuAtas"><b id="txtTegangan">9 V</b><span>🔋 TEGANGAN (V)</span></div>
-    <div class="kartuAtas"><b id="txtHambatan">30 Ω</b><span>〰️ HAMBATAN (R)</span></div>
-    <div class="kartuAtas"><b id="txtDaya">0 W</b><span>💡 DAYA (P)</span></div>
-    <div class="kartuAtas"><b id="txtLampu">MATI</b><span>💡 LAMPU</span></div>
-  </div>
-  <div class="info hilang" id="infoStatis">
-    <div class="kartuAtas"><b id="balonMuatan">Netral</b><span>🎈 BALON</span></div>
-    <div class="kartuAtas"><b id="sweaterMuatan">Netral</b><span>🧶 SWEATER</span></div>
-    <div class="kartuAtas"><b id="elektronPindah">0</b><span>ELEKTRON PINDAH</span></div>
-  </div>
-  <div id="pesan">👆 Seret komponen dari palet ke papan! Klik saklar gawe ON/OFF</div>
-</div>
-
-<!-- PANEL DINAMIS -->
-<div id="panelDinamis">
-  <div class="palet">
-    <div onclick="tambahKomponen('baterai')">🔋 BATERAI<small>Klik gawe nambah</small></div>
-    <div onclick="tambahKomponen('lampu')">💡 LAMPU<small>Klik gawe nambah</small></div>
-    <div onclick="tambahKomponen('resistor')">〰️ RESISTOR<small>Klik gawe nambah</small></div>
-    <div onclick="tambahKomponen('saklar')">🔀 SAKLAR<small>Klik gawe nambah</small></div>
-    <div onclick="tambahKomponen('kabel')">— KABEL<small>Klik gawe nambah</small></div>
-    <div onclick="hapusTerakhir()">🗑️ Hapus Terakhir</div>
-    <div onclick="resetDinamis()">🔄 Reset</div>
-  </div>
-  <div class="panel">
-    <div class="kartu">
-      <b>🔋 TEGANGAN BATERAI (V)</b>
-      <div class="nilai"><span id="valV">9</span> Volt</div>
-      <input type="range" min="1.5" max="12" step="0.5" value="9" id="sliderV" oninput="ubahV(this.value)">
-      <small>1.5V - 12V • Geser gawe ubah</small>
-    </div>
-    <div class="kartu">
-      <b>〰️ RESISTOR (R)</b>
-      <div class="nilai"><span id="valR">10</span> Ω</div>
-      <input type="range" min="1" max="100" step="1" value="10" id="sliderR" oninput="ubahR(this.value)">
-      <small>1Ω - 100Ω • Makin gede, arus makin cilik</small>
-    </div>
-    <div class="kartu">
-      <b>💡 LAMPU (Hambatan Lampu)</b>
-      <div class="nilai"><span id="valLampu">20</span> Ω</div>
-      <input type="range" min="5" max="50" step="1" value="20" id="sliderLampu" oninput="ubahLampu(this.value)">
-      <small>5Ω - 50Ω • Lampu cilik = luwih padang</small>
-    </div>
-    <div class="kartu">
-      <b>🔌 RANGKAIAN</b>
-      <div style="display:flex;gap:6px;margin-top:6px">
-        <button class="btn aktif" id="btnSeri" onclick="setRangkaian('seri')">SERI</button>
-        <button class="btn" id="btnParalel" onclick="setRangkaian('paralel')">PARALEL</button>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
+  <!-- Header Navigasi Utama -->
+  <header class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white shadow-lg border-b border-blue-800/40 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <!-- Logo & Judul -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-900 flex items-center justify-center shadow-md shadow-amber-500/20 font-extrabold text-xl">
+          ⚡
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-extrabold tracking-tight leading-tight">
+            Simulasi Listrik: <span class="text-amber-400">Statis & Dinamis</span>
+          </h1>
+          <p class="text-[11px] sm:text-xs text-blue-200/80">Laboratorium Fisika Interaktif Virtual</p>
+        </div>
       </div>
-      <small id="ketRangkaian" style="display:block;margin-top:6px">Seri: Arus sama, tegangan dibagi. Lampu 1 mati = kabeh mati.</small>
+
+      <!-- Tab Navigasi -->
+      <nav class="flex bg-slate-800/90 p-1 rounded-xl border border-slate-700/80 w-full sm:w-auto">
+        <button
+          id="tab-btn-static"
+          onclick="switchTab('static')"
+          class="flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 bg-blue-600 text-white shadow-md"
+        >
+          <span>🎈</span>
+          <span>1. Listrik Statis</span>
+        </button>
+        <button
+          id="tab-btn-dynamic"
+          onclick="switchTab('dynamic')"
+          class="flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-slate-300 hover:text-white"
+        >
+          <span>🔌</span>
+          <span>2. Listrik Dinamis</span>
+        </button>
+      </nav>
     </div>
-    <div class="kartu">
-      <b>🔀 SAKLAR UTAMA</b>
-      <div style="display:flex;gap:6px;margin-top:6px">
-        <button class="btn hijau" id="btnOn" onclick="setSaklar(true)">ON ●</button>
-        <button class="btn" id="btnOff" onclick="setSaklar(false)">OFF ○</button>
+  </header>
+
+  <!-- Konten Utama -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 flex flex-col gap-4">
+    <!-- =================================================================== -->
+    <!-- TAB 1: LISTRIK STATIS (BALON, SWETER, DAN DINDING)                  -->
+    <!-- =================================================================== -->
+    <section id="view-static" class="flex flex-col lg:flex-row gap-4 flex-1">
+      <!-- Area Kanvas Simulasi Statis -->
+      <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col relative min-h-[430px] sm:min-h-[520px]">
+        <!-- Bar Info Atas Kanvas -->
+        <div class="bg-slate-50 border-b border-slate-200 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-2 text-slate-600">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span><strong>Petunjuk:</strong> Seret balon ke <strong>Sweter Wol</strong> untuk menggosok elektron, lalu dekatkan ke <strong>Dinding</strong> atau lepaskan!</span>
+          </div>
+          <div class="flex items-center gap-3 font-mono text-[11px]">
+            <span class="flex items-center gap-1 text-rose-600 font-bold"><span class="w-3.5 h-3.5 rounded-full bg-rose-500 text-white inline-flex items-center justify-center text-[10px]">+</span> Proton</span>
+            <span class="flex items-center gap-1 text-blue-600 font-bold"><span class="w-3.5 h-3.5 rounded-full bg-blue-600 text-white inline-flex items-center justify-center text-[10px]">−</span> Elektron</span>
+          </div>
+        </div>
+
+        <!-- Wrapper Canvas -->
+        <div id="static-canvas-container" class="relative flex-1 w-full bg-gradient-to-b from-sky-50 via-white to-amber-50/40">
+          <canvas id="staticCanvas"></canvas>
+
+          <!-- Indikator Muatan Real-Time Mengambang -->
+          <div class="absolute bottom-3 left-3 right-3 pointer-events-none flex flex-wrap justify-between gap-2 text-[11px]">
+            <div class="bg-white/90 backdrop-blur border border-slate-200 rounded-xl px-3 py-1.5 shadow-sm flex items-center gap-3">
+              <span class="font-semibold text-slate-700">Muatan Sweter:</span>
+              <span id="stat-sweater-charge" class="font-mono font-bold text-slate-800">0 (Netral)</span>
+            </div>
+            <div class="flex gap-2">
+              <div class="bg-white/90 backdrop-blur border border-amber-200 rounded-xl px-3 py-1.5 shadow-sm flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span class="font-semibold text-slate-700">Balon 1:</span>
+                <span id="stat-balloon1-charge" class="font-mono font-bold text-slate-800">0</span>
+              </div>
+              <div id="stat-balloon2-badge" class="hidden bg-white/90 backdrop-blur border border-emerald-200 rounded-xl px-3 py-1.5 shadow-sm flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="font-semibold text-slate-700">Balon 2:</span>
+                <span id="stat-balloon2-charge" class="font-mono font-bold text-slate-800">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <small>Nek OFF, arus = 0, lampu mati.</small>
-    </div>
-    <div class="kartu rumus">
-      <b>📐 RUMUS - Hukum Ohm</b><br>
-      <b>I = V / R</b> &nbsp; • &nbsp; <b>P = V × I</b><br>
-      Seri: R<sub>total</sub> = R1 + R2<br>
-      Paralel: 1/R<sub>total</sub> = 1/R1 + 1/R2<br>
-      <span id="rumusLive">I = 9 / 30 = 0.30 A</span>
-    </div>
-  </div>
-  <div class="panel">
-    <div class="kartu" style="flex:2">
-      <b>📊 TABEL PERCOBAAN - Coba ubah-ubah, catat!</b>
-      <table>
-        <tr><th>Percobaan</th><th>V (Volt)</th><th>R (Ω)</th><th>I (A)</th><th>Lampu</th></tr>
-        <tr><td>1</td><td id="tV">9</td><td id="tR">30</td><td id="tI">0.30</td><td id="tLampu">Padang</td></tr>
-      </table>
-      <small>Kesimpulan: Nek V naik → I naik → Lampu makin padang. Nek R naik → I turun → Lampu redup.</small>
-    </div>
-    <div class="kartu">
-      <b>🎯 TANTANGAN</b>
-      <small>
-      1. Gawe lampu paling padang tanpa pedot (I &lt; 1A)<br>
-      2. Gawe I = 0.5 A persis<br>
-      3. Bandingke Seri vs Paralel<br>
-      4. Gawe lampu pedot! (I &gt; 1.2A)<br>
-      </small>
-      <button class="btn orange" onclick="tantangan()">🎲 Acak Nilai</button>
-    </div>
-  </div>
-</div>
 
-<!-- PANEL STATIS -->
-<div id="panelStatis" class="hilang">
-  <div class="panel">
-    <div class="kartu"><b>🎈 BALON</b><small>Seret balon ke sweater, gosok-gosok cepet. Elektron pindah ke balon.</small><br><button class="btn" onclick="tambahBalon()">+ Balon</button> <button class="btn merah" onclick="lepasBalon()">Lepas Balon</button></div>
-    <div class="kartu"><b>🧶 SWEATER</b><small>Sweater kehilangan elektron → dadi positif (+).</small><br><button class="btn orange" onclick="resetStatis()">🔄 Reset Statis</button></div>
-    <div class="kartu rumus"><b>📐 STATIS</b><br>Muatan sejenis <b>tolak-menolak</b> (- tolak -)<br>Muatan beda <b>tarik-menarik</b> (+ tarik -)<br><b>Induksi:</b> Balon - didekke dinding → dinding dadi + neng sisi kiri, balon nempel!</div>
-  </div>
-</div>
+      <!-- Panel Kontrol Listrik Statis -->
+      <aside class="w-full lg:w-80 bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col gap-4">
+        <div class="border-b border-slate-100 pb-2.5">
+          <h2 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+            <span>🎛️</span> Panel Kontrol Listrik Statis
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Atur tampilan muatan, jumlah balon, dan parameter gesekan.</p>
+        </div>
 
-</div>
+        <!-- Mode Tampilan Muatan -->
+        <div class="space-y-2">
+          <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Tampilan Muatan</label>
+          <div class="grid grid-cols-1 gap-1.5">
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+              <input type="radio" name="chargeMode" value="all" checked onchange="setStaticChargeMode('all')" class="w-4 h-4 text-blue-600" />
+              <span class="text-xs font-medium text-slate-700">Tampilkan Semua Muatan</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+              <input type="radio" name="chargeMode" value="diff" onchange="setStaticChargeMode('diff')" class="w-4 h-4 text-blue-600" />
+              <span class="text-xs font-medium text-slate-700">Tampilkan Selisih Muatan</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+              <input type="radio" name="chargeMode" value="none" onchange="setStaticChargeMode('none')" class="w-4 h-4 text-blue-600" />
+              <span class="text-xs font-medium text-slate-700">Sembunyikan Muatan</span>
+            </label>
+          </div>
+        </div>
 
-<script>
-let cv=document.getElementById('cv');
-let ctx=cv.getContext('2d');
-let W,H;
-function resize(){ W=cv.width=cv.offsetWidth*devicePixelRatio; H=cv.height=cv.offsetHeight*devicePixelRatio; }
-window.addEventListener('resize',resize); resize();
+        <!-- Opsi Tambahan (Toggle) -->
+        <div class="space-y-2.5 pt-1 border-t border-slate-100">
+          <label class="text-xs font-bold uppercase tracking-wider text-slate-500">Opsi Simulasi</label>
 
-let mode='dinamis';
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 cursor-pointer">
+            <span class="text-xs font-semibold text-slate-700">🎈 Dua Balon</span>
+            <input id="toggle-two-balloons" type="checkbox" onchange="toggleSecondBalloon(this.checked)" class="w-4 h-4 rounded text-blue-600" />
+          </label>
 
-// ===== DINAMIS STATE =====
-let V=9, Rresistor=10, Rlampu=20, saklarOn=true, rangkaian='seri';
-let komponen=[]; // komponen custom yang ditambah user
-let elektron=[]; // partikel arus
-let lampuPedot=false, pedotTimer=0;
-let pesanTimer=null;
-function showPesan(t){
-  let p=document.getElementById('pesan'); p.innerText=t; p.classList.remove('hilang');
-  clearTimeout(pesanTimer); pesanTimer=setTimeout(()=>p.classList.add('hilang'), 4000);
-}
-function hitung(){
-  let Rtotal;
-  if(rangkaian==='seri') Rtotal=Rresistor+Rlampu;
-  else Rtotal=1/(1/Rresistor + 1/Rlampu); // paralel
-  let I = saklarOn ? V/Rtotal : 0;
-  let P = V*I;
-  return {Rtotal, I, P};
-}
-function ubahV(v){ V=parseFloat(v); document.getElementById('valV').innerText=v; updateDinamis(); }
-function ubahR(v){ Rresistor=parseFloat(v); document.getElementById('valR').innerText=v; updateDinamis(); }
-function ubahLampu(v){ Rlampu=parseFloat(v); document.getElementById('valLampu').innerText=v; updateDinamis(); }
-function setRangkaian(r){
-  rangkaian=r;
-  document.getElementById('btnSeri').classList.toggle('aktif', r==='seri');
-  document.getElementById('btnParalel').classList.toggle('aktif', r==='paralel');
-  document.getElementById('ketRangkaian').innerText= r==='seri' ? 'Seri: Arus sama, tegangan dibagi. Lampu 1 mati = kabeh mati.' : 'Paralel: Tegangan sama, arus dibagi. Lampu 1 mati, lampu liyo tetep nyala. Luwih padang!';
-  updateDinamis();
-}
-function setSaklar(on){
-  saklarOn=on;
-  document.getElementById('btnOn').classList.toggle('hijau', on);
-  document.getElementById('btnOn').classList.toggle('aktif', on);
-  document.getElementById('btnOff').classList.toggle('aktif', !on);
-  showPesan(on ? '🔌 Saklar ON - Arus ngalir!' : '🔌 Saklar OFF - Arus mandek, lampu mati!');
-  updateDinamis();
-}
-function tantangan(){
-  V=Math.floor(Math.random()*8)+3;
-  Rresistor=Math.floor(Math.random()*40)+5;
-  Rlampu=Math.floor(Math.random()*30)+5;
-  document.getElementById('sliderV').value=V; document.getElementById('sliderR').value=Rresistor; document.getElementById('sliderLampu').value=Rlampu;
-  document.getElementById('valV').innerText=V; document.getElementById('valR').innerText=Rresistor; document.getElementById('valLampu').innerText=Rlampu;
-  saklarOn=true; lampuPedot=false;
-  showPesan('🎲 Nilai diacak! V='+V+'V, R='+Rresistor+'Ω, Lampu='+Rlampu+'Ω');
-  updateDinamis();
-}
-function tambahKomponen(jenis){
-  let nama={baterai:'🔋 Baterai', lampu:'💡 Lampu', resistor:'〰️ Resistor', saklar:'🔀 Saklar', kabel:'— Kabel'}[jenis];
-  komponen.push({jenis, x:0.2+Math.random()*0.6, y:0.55+Math.random()*0.25, drag:false});
-  showPesan(nama+' ditambahkan! Seret gawe mindah. Klik 2x gawe hapus.');
-  if(jenis==='lampu') showPesan('💡 Lampu tambahan! Nek seri, lampu dibagi. Nek paralel, padang kabeh!');
-}
-function hapusTerakhir(){
-  if(komponen.length===0){ showPesan('Ora ono komponen sing iso dihapus'); return; }
-  komponen.pop(); showPesan('🗑️ Komponen terakhir dihapus');
-}
-function resetDinamis(){
-  komponen=[]; V=9; Rresistor=10; Rlampu=20; saklarOn=true; rangkaian='seri'; lampuPedot=false;
-  document.getElementById('sliderV').value=9; document.getElementById('sliderR').value=10; document.getElementById('sliderLampu').value=20;
-  document.getElementById('valV').innerText=9; document.getElementById('valR').innerText=10; document.getElementById('valLampu').innerText=20;
-  setRangkaian('seri'); setSaklar(true);
-  showPesan('🔄 Reset rangkaian!');
-}
-function updateDinamis(){
-  let {Rtotal, I, P}=hitung();
-  // Cek lampu pedot
-  if(I>1.2 && !lampuPedot){ lampuPedot=true; pedotTimer=120; showPesan('💥 LAMPU PEDOT! Arus kegeden (>1.2A)! Kurangi V / Tambah R!'); }
-  if(I<0.9) lampuPedot=false;
-  document.getElementById('txtArus').innerText=I.toFixed(2)+' A';
-  document.getElementById('txtTegangan').innerText=V+' V';
-  document.getElementById('txtHambatan').innerText=Rtotal.toFixed(1)+' Ω';
-  document.getElementById('txtDaya').innerText=P.toFixed(1)+' W';
-  let lampuTxt = !saklarOn ? 'MATI (OFF)' : lampuPedot ? 'PEDOT 💥' : I<0.1 ? 'REDUP' : I<0.4 ? 'PADANG' : I<0.8 ? 'PADANG BANGET' : 'SILAU! ⚠️';
-  document.getElementById('txtLampu').innerText=lampuTxt;
-  document.getElementById('txtLampu').style.color= !saklarOn||lampuPedot ? '#c62828' : '#2e7d32';
-  document.getElementById('rumusLive').innerText='I = '+V+' / '+Rtotal.toFixed(1)+' = '+I.toFixed(2)+' A  •  P = '+V+' × '+I.toFixed(2)+' = '+P.toFixed(1)+' W';
-  document.getElementById('tV').innerText=V; document.getElementById('tR').innerText=Rtotal.toFixed(1); document.getElementById('tI').innerText=I.toFixed(2); document.getElementById('tLampu').innerText=lampuTxt;
-}
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 cursor-pointer">
+            <span class="text-xs font-semibold text-slate-700">🏹 Tampilkan Vektor Gaya</span>
+            <input id="toggle-force-vectors" type="checkbox" checked onchange="toggleForceVectors(this.checked)" class="w-4 h-4 rounded text-blue-600" />
+          </label>
 
-// ===== STATIS STATE =====
-let sweater={x:0.28, y:0.55, w:0.28, h:0.42, charges:[]};
-let dinding={x:0.92, y:0.5, w:0.08, h:0.85};
-let balons=[{x:0.62, y:0.35, r:0.075, elektron:8, proton:8, drag:false, nempel:false, warna:'#ffeb3b', nama:'Balon Kuning'}];
-let elektronTerbang=[];
-function initStatis(){
-  sweater.charges=[];
-  for(let i=0;i<12;i++) sweater.charges.push({x:Math.random(), y:Math.random(), type:'+'});
-  for(let i=0;i<12;i++) sweater.charges.push({x:Math.random(), y:Math.random(), type:'-'});
-}
-initStatis();
-function tambahBalon(){
-  if(balons.length>=2){ showPesan('Maksimal 2 balon!'); return; }
-  balons.push({x:0.62, y:0.65, r:0.075, elektron:8, proton:8, drag:false, nempel:false, warna:'#ff80ab', nama:'Balon Pink'});
-  showPesan('🎈 Balon baru!');
-}
-function lepasBalon(){ balons.forEach(b=>{ b.nempel=false; }); showPesan('🎈 Balon dilepas!'); }
-function resetStatis(){
-  balons=[{x:0.62, y:0.35, r:0.075, elektron:8, proton:8, drag:false, nempel:false, warna:'#ffeb3b', nama:'Balon Kuning'}];
-  elektronTerbang=[]; initStatis(); showPesan('🔄 Reset statis!');
-}
-function gantiTab(t){
-  mode=t;
-  document.getElementById('tabDinamis').classList.toggle('aktif', t==='dinamis');
-  document.getElementById('tabStatis').classList.toggle('aktif', t==='statis');
-  document.getElementById('panelDinamis').classList.toggle('hilang', t!=='dinamis');
-  document.getElementById('panelStatis').classList.toggle('hilang', t!=='statis');
-  document.getElementById('infoDinamis').classList.toggle('hilang', t!=='dinamis');
-  document.getElementById('infoStatis').classList.toggle('hilang', t!=='statis');
-  showPesan(t==='dinamis' ? '🔌 Mode Dinamis: Ubah V, R, Seri/Paralel, Saklar!' : '🎈 Mode Statis: Seret balon ke sweater, gosok!');
-}
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 cursor-pointer">
+            <span class="text-xs font-semibold text-slate-700">🧱 Dinding Isolator</span>
+            <input id="toggle-wall" type="checkbox" checked onchange="toggleWall(this.checked)" class="w-4 h-4 rounded text-blue-600" />
+          </label>
+        </div>
 
-// ===== DRAG =====
-let dragObj=null, dragType=null, offX=0, offY=0;
-function getPos(e){
-  let r=cv.getBoundingClientRect();
-  let cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
-  let cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
-  return {x:cx/r.width, y:cy/r.height};
-}
-cv.addEventListener('touchstart', mulai, {passive:false});
-cv.addEventListener('mousedown', mulai);
-function mulai(e){
-  e.preventDefault();
-  let p=getPos(e);
-  if(mode==='statis'){
-    for(let i=balons.length-1;i>=0;i--){
-      let b=balons[i];
-      if(Math.hypot(p.x-b.x, p.y-b.y)<b.r+0.04){ dragObj=b; dragType='balon'; b.drag=true; b.nempel=false; offX=p.x-b.x; offY=p.y-b.y; break; }
+        <!-- Slider Kekuatan Gesekan -->
+        <div class="space-y-1.5 pt-1 border-t border-slate-100">
+          <div class="flex justify-between items-center">
+            <label for="friction-slider" class="text-xs font-bold text-slate-700">Kekuatan Gesekan</label>
+            <span id="friction-val-label" class="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">Sedang (50%)</span>
+          </div>
+          <input
+            id="friction-slider"
+            type="range"
+            min="10"
+            max="100"
+            value="50"
+            oninput="updateFrictionStrength(this.value)"
+            class="w-full cursor-pointer"
+          />
+          <p class="text-[11px] text-slate-400">Mengatur kecepatan perpindahan elektron saat balon digosok ke sweter.</p>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="mt-auto pt-2 flex flex-col gap-2">
+          <button
+            onclick="resetStaticSimulation()"
+            class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-[0.99] text-white font-bold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2"
+          >
+            <span>🔄</span>
+            <span>Reset Balon & Muatan</span>
+          </button>
+        </div>
+      </aside>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 2: LISTRIK DINAMIS (SIMULASI RANGKAIAN DC)                      -->
+    <!-- =================================================================== -->
+    <section id="view-dynamic" class="hidden flex-col gap-3 flex-1">
+      <!-- Bar Atas: Preset Rangkaian & Opsi Tampilan -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-3 flex flex-wrap items-center justify-between gap-3">
+        <!-- Preset Rangkaian -->
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-bold text-slate-600 mr-1">📋 Preset Rangkaian:</span>
+          <button onclick="loadCircuitPreset('series')" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition">
+            Rangkaian Seri
+          </button>
+          <button onclick="loadCircuitPreset('parallel')" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition">
+            Rangkaian Paralel
+          </button>
+          <button onclick="loadCircuitPreset('mixed')" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition">
+            Rangkaian Campuran
+          </button>
+          <button onclick="loadCircuitPreset('empty')" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition">
+            Kanvas Kosong
+          </button>
+        </div>
+
+        <!-- Opsi Tampilan & Alat Ukur -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
+          <label class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200 cursor-pointer">
+            <input id="dyn-show-values" type="checkbox" checked onchange="dynOptions.showValues = this.checked" class="rounded text-blue-600" />
+            <span class="font-medium text-slate-700">Nilai Komponen</span>
+          </label>
+
+          <label class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200 cursor-pointer">
+            <input id="dyn-schematic" type="checkbox" onchange="dynOptions.schematic = this.checked" class="rounded text-blue-600" />
+            <span class="font-medium text-slate-700">Simbol Skematik</span>
+          </label>
+
+          <button
+            id="btn-toggle-current-type"
+            onclick="toggleCurrentDirectionMode()"
+            class="px-2.5 py-1.5 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold hover:bg-indigo-100 transition flex items-center gap-1.5"
+          >
+            <span id="current-mode-dot" class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+            <span id="current-mode-label">Aliran Elektron (−)</span>
+          </button>
+
+          <button
+            id="btn-toggle-voltmeter"
+            onclick="toggleVoltmeter()"
+            class="px-3 py-1.5 rounded-xl bg-amber-500 text-white font-bold shadow-sm hover:bg-amber-600 transition flex items-center gap-1.5"
+          >
+            <span>📟</span>
+            <span>Voltmeter</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Area Utama: Palet Komponen (Kiri), Papan Kerja (Tengah), Properti (Kanan/Bawah) -->
+      <div class="flex flex-col lg:flex-row gap-3 flex-1">
+        <!-- Panel Kiri: Palet Komponen -->
+        <aside class="w-full lg:w-52 bg-white rounded-2xl shadow-sm border border-slate-200 p-3 flex flex-col gap-2.5">
+          <div>
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Komponen Listrik</h2>
+            <p class="text-[11px] text-slate-400">Klik untuk menambah ke papan kerja</p>
+          </div>
+
+          <div class="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-1 gap-2">
+            <button onclick="addCircuitComponent('wire')" class="flex flex-col lg:flex-row items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition text-left group">
+              <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm shrink-0 group-hover:scale-105 transition">➖</div>
+              <div>
+                <div class="text-xs font-bold text-slate-800">Kabel</div>
+                <div class="text-[10px] text-slate-400 hidden lg:block">Penghantar ideal</div>
+              </div>
+            </button>
+
+            <button onclick="addCircuitComponent('battery')" class="flex flex-col lg:flex-row items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition text-left group">
+              <div class="w-8 h-8 rounded-lg bg-slate-800 text-amber-400 flex items-center justify-center font-bold text-sm shrink-0 group-hover:scale-105 transition">🔋</div>
+              <div>
+                <div class="text-xs font-bold text-slate-800">Baterai</div>
+                <div class="text-[10px] text-slate-400 hidden lg:block">Sumber tegangan DC</div>
+              </div>
+            </button>
+
+            <button onclick="addCircuitComponent('bulb')" class="flex flex-col lg:flex-row items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition text-left group">
+              <div class="w-8 h-8 rounded-lg bg-yellow-100 text-yellow-600 flex items-center justify-center font-bold text-sm shrink-0 group-hover:scale-105 transition">💡</div>
+              <div>
+                <div class="text-xs font-bold text-slate-800">Lampu</div>
+                <div class="text-[10px] text-slate-400 hidden lg:block">Bohlam berhambatan</div>
+              </div>
+            </button>
+
+            <button onclick="addCircuitComponent('resistor')" class="flex flex-col lg:flex-row items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition text-left group">
+              <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-sm shrink-0 group-hover:scale-105 transition">〰️</div>
+              <div>
+                <div class="text-xs font-bold text-slate-800">Resistor</div>
+                <div class="text-[10px] text-slate-400 hidden lg:block">Hambatan tetap</div>
+              </div>
+            </button>
+
+            <button onclick="addCircuitComponent('switch')" class="flex flex-col lg:flex-row items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition text-left group">
+              <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm shrink-0 group-hover:scale-105 transition">🎚️</div>
+              <div>
+                <div class="text-xs font-bold text-slate-800">Sakelar</div>
+                <div class="text-[10px] text-slate-400 hidden lg:block">Klik untuk buka/tutup</div>
+              </div>
+            </button>
+
+            <button onclick="addCircuitComponent('ammeter')" class="flex flex-col lg:flex-row items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition text-left group">
+              <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center font-bold text-sm shrink-0 group-hover:scale-105 transition">🧭</div>
+              <div>
+                <div class="text-xs font-bold text-slate-800">Amperemeter</div>
+                <div class="text-[10px] text-slate-400 hidden lg:block">Ukur arus seri (A)</div>
+              </div>
+            </button>
+          </div>
+
+          <div class="mt-auto pt-2 border-t border-slate-100 text-[11px] text-slate-500 space-y-1 hidden lg:block">
+            <p class="font-semibold text-slate-700">💡 Tips Merakit:</p>
+            <ul class="list-disc pl-4 space-y-0.5 text-[10px]">
+              <li>Seret ujung lingkaran (node) komponen ke ujung komponen lain untuk menyambung.</li>
+              <li>Klik bagian tengah komponen untuk memilih & mengubah nilainya.</li>
+              <li>Klik ganda pada node sambungan untuk memutus sambungan.</li>
+            </ul>
+          </div>
+        </aside>
+
+        <!-- Papan Kerja Rangkaian (Canvas) -->
+        <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col relative min-h-[430px] sm:min-h-[500px]">
+          <!-- Peringatan Korsleting (Short Circuit) -->
+          <div id="short-circuit-banner" class="hidden bg-rose-600 text-white px-4 py-2 text-xs font-bold flex items-center justify-between animate-pulse">
+            <div class="flex items-center gap-2">
+              <span class="text-base">🔥</span>
+              <span>PERINGATAN KORSLETING (HUBUNG SINGKAT)! Arus sangat besar mengalir tanpa hambatan!</span>
+            </div>
+            <span class="font-mono bg-rose-800 px-2 py-0.5 rounded">I &gt; 100 A</span>
+          </div>
+
+          <div id="dynamic-canvas-container" class="relative flex-1 w-full bg-slate-900">
+            <canvas id="dynamicCanvas"></canvas>
+
+            <!-- Tampilan Voltmeter Digital Mengambang (jika aktif) -->
+            <div
+              id="voltmeter-readout-card"
+              class="hidden absolute top-3 right-3 bg-amber-400 text-slate-950 rounded-2xl shadow-xl border-2 border-amber-500 p-3 w-48 pointer-events-none"
+            >
+              <div class="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider border-b border-amber-500/40 pb-1 mb-1.5">
+                <span>📟 Voltmeter DC</span>
+                <span class="bg-slate-900 text-amber-300 px-1.5 py-0.2 rounded">V</span>
+              </div>
+              <div class="bg-slate-900 text-emerald-400 font-mono text-xl font-bold text-right px-2.5 py-1.5 rounded-lg shadow-inner" id="voltmeter-display-val">
+                0.00 V
+              </div>
+              <div class="mt-1.5 flex justify-between text-[10px] font-semibold text-slate-800">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-600"></span> Probe (+) Merah</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-slate-900"></span> Probe (−) Hitam</span>
+              </div>
+            </div>
+
+            <!-- Bar Status Bawah Kanvas -->
+            <div class="absolute bottom-2.5 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none text-[11px]">
+              <div class="bg-slate-800/90 text-slate-200 backdrop-blur px-3 py-1.5 rounded-xl border border-slate-700">
+                <span id="circuit-status-text">Siap merakit. Klik komponen untuk mengatur nilai.</span>
+              </div>
+              <button
+                onclick="resetDynamicCircuit()"
+                class="pointer-events-auto px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-rose-600 text-slate-200 hover:text-white border border-slate-700 font-semibold transition flex items-center gap-1.5 shadow"
+              >
+                <span>🗑️</span>
+                <span>Bersihkan Papan</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel Kanan/Bawah: Pengaturan Komponen Terpilih -->
+        <aside class="w-full lg:w-72 bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col gap-3">
+          <div class="border-b border-slate-100 pb-2">
+            <h2 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+              <span>⚙️</span> Kustomisasi Komponen
+            </h2>
+            <p class="text-[11px] text-slate-500">Pilih komponen pada papan kerja untuk mengubah nilainya.</p>
+          </div>
+
+          <!-- Konten Dinamis Panel Properti -->
+          <div id="inspector-empty" class="flex-1 flex flex-col items-center justify-center text-center py-6 px-3 text-slate-400">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl mb-2">👆</div>
+            <p class="text-xs font-semibold text-slate-600">Belum ada komponen dipilih</p>
+            <p class="text-[11px] mt-1">Klik salah satu baterai, resistor, lampu, atau sakelar di papan rangkaian.</p>
+          </div>
+
+          <div id="inspector-controls" class="hidden flex-col gap-3.5">
+            <!-- Header Komponen Terpilih -->
+            <div class="bg-blue-50/80 border border-blue-200/80 rounded-xl p-2.5 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-blue-600">Komponen Terpilih</span>
+                <h3 id="insp-comp-name" class="text-sm font-extrabold text-slate-800">Baterai DC</h3>
+              </div>
+              <span id="insp-comp-badge" class="text-xs font-mono font-bold bg-white text-blue-700 px-2 py-1 rounded-lg border border-blue-200">#1</span>
+            </div>
+
+            <!-- Kontrol Tegangan Baterai -->
+            <div id="ctrl-voltage-group" class="hidden space-y-1.5">
+              <div class="flex justify-between items-center">
+                <label class="text-xs font-bold text-slate-700">Tegangan (V)</label>
+                <div class="flex items-center gap-1">
+                  <input id="insp-voltage-num" type="number" min="0" max="120" step="0.5" class="w-16 text-right font-mono text-xs font-bold border border-slate-300 rounded-lg px-1.5 py-1" />
+                  <span class="text-xs font-bold text-slate-500">V</span>
+                </div>
+              </div>
+              <input id="insp-voltage-range" type="range" min="0" max="120" step="0.5" class="w-full cursor-pointer" />
+            </div>
+
+            <!-- Kontrol Hambatan Dalam Baterai -->
+            <div id="ctrl-internal-r-group" class="hidden space-y-1.5 pt-2 border-t border-slate-100">
+              <div class="flex justify-between items-center">
+                <label class="text-xs font-bold text-slate-700">Hambatan Dalam (r)</label>
+                <div class="flex items-center gap-1">
+                  <input id="insp-internal-r-num" type="number" min="0" max="10" step="0.1" class="w-16 text-right font-mono text-xs font-bold border border-slate-300 rounded-lg px-1.5 py-1" />
+                  <span class="text-xs font-bold text-slate-500">Ω</span>
+                </div>
+              </div>
+              <input id="insp-internal-r-range" type="range" min="0" max="10" step="0.1" class="w-full cursor-pointer" />
+            </div>
+
+            <!-- Kontrol Hambatan Resistor / Lampu -->
+            <div id="ctrl-resistance-group" class="hidden space-y-1.5">
+              <div class="flex justify-between items-center">
+                <label id="insp-resistance-label" class="text-xs font-bold text-slate-700">Hambatan (R)</label>
+                <div class="flex items-center gap-1">
+                  <input id="insp-resistance-num" type="number" min="1" max="100" step="1" class="w-16 text-right font-mono text-xs font-bold border border-slate-300 rounded-lg px-1.5 py-1" />
+                  <span class="text-xs font-bold text-slate-500">Ω</span>
+                </div>
+              </div>
+              <input id="insp-resistance-range" type="range" min="1" max="100" step="1" class="w-full cursor-pointer" />
+            </div>
+
+            <!-- Kontrol Sakelar -->
+            <div id="ctrl-switch-group" class="hidden space-y-2">
+              <label class="text-xs font-bold text-slate-700 block">Status Sakelar</label>
+              <button
+                id="insp-switch-toggle-btn"
+                onclick="toggleSelectedSwitch()"
+                class="w-full py-2.5 px-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 text-white"
+              >
+                Tertutup (Menghubungkan)
+              </button>
+            </div>
+
+            <!-- Pembacaan Real-Time pada Komponen Terpilih -->
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80 space-y-1.5 text-xs">
+              <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Pembacaan Langsung</div>
+              <div class="flex justify-between">
+                <span class="text-slate-600">Arus Mengalir (I):</span>
+                <span id="insp-read-current" class="font-mono font-bold text-blue-600">0.00 A</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-600">Beda Potensial (ΔV):</span>
+                <span id="insp-read-voltage" class="font-mono font-bold text-amber-600">0.00 V</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-600">Daya Disipasi (P):</span>
+                <span id="insp-read-power" class="font-mono font-bold text-emerald-600">0.00 W</span>
+              </div>
+            </div>
+
+            <!-- Tombol Putus Sambungan & Hapus Komponen -->
+            <div class="pt-2 border-t border-slate-100 flex flex-col gap-2">
+              <button
+                onclick="detachSelectedComponent()"
+                class="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition flex items-center justify-center gap-1.5"
+              >
+                <span>✂️</span>
+                <span>Lepas Semua Sambungan</span>
+              </button>
+              <button
+                onclick="deleteSelectedComponent()"
+                class="w-full py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200 font-bold text-xs transition flex items-center justify-center gap-1.5"
+              >
+                <span>🗑️</span>
+                <span>Hapus Komponen Ini</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // =========================================================================
+    // MANAJEMEN NAVIGASI TAB
+    // =========================================================================
+    let activeTab = 'static';
+
+    function switchTab(tabName) {
+      activeTab = tabName;
+      const staticView = document.getElementById('view-static');
+      const dynamicView = document.getElementById('view-dynamic');
+      const btnStatic = document.getElementById('tab-btn-static');
+      const btnDynamic = document.getElementById('tab-btn-dynamic');
+
+      if (tabName === 'static') {
+        staticView.classList.remove('hidden');
+        staticView.classList.add('flex');
+        dynamicView.classList.add('hidden');
+        dynamicView.classList.remove('flex');
+
+        btnStatic.className =
+          'flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 bg-blue-600 text-white shadow-md';
+        btnDynamic.className =
+          'flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-slate-300 hover:text-white';
+        resizeStaticCanvas();
+      } else {
+        dynamicView.classList.remove('hidden');
+        dynamicView.classList.add('flex');
+        staticView.classList.add('hidden');
+        staticView.classList.remove('flex');
+
+        btnDynamic.className =
+          'flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 bg-blue-600 text-white shadow-md';
+        btnStatic.className =
+          'flex-1 sm:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-slate-300 hover:text-white';
+        resizeDynamicCanvas();
+      }
     }
-  }else{
-    // Cek klik komponen custom
-    for(let i=komponen.length-1;i>=0;i--){
-      let k=komponen[i];
-      if(Math.abs(p.x-k.x)<0.07 && Math.abs(p.y-k.y)<0.07){ dragObj=k; dragType='komponen'; offX=p.x-k.x; offY=p.y-k.y; break; }
-    }
-    // Cek klik saklar utama neng gambar (kotak saklar)
-    if(!dragObj && p.x>0.72 && p.x<0.82 && p.y>0.28 && p.y<0.42){ setSaklar(!saklarOn); }
-    // Cek klik baterai utama
-    if(!dragObj && p.x>0.12 && p.x<0.22 && p.y>0.28 && p.y<0.42){ showPesan('🔋 Baterai '+V+'V - Geser slider neng ngisor gawe ubah!'); }
-  }
-}
-cv.addEventListener('touchmove', gerak, {passive:false});
-cv.addEventListener('mousemove', gerak);
-function gerak(e){
-  if(!dragObj) return;
-  e.preventDefault();
-  let p=getPos(e);
-  let oldX=dragObj.x, oldY=dragObj.y;
-  dragObj.x=Math.max(0.08, Math.min(0.92, p.x-offX));
-  dragObj.y=Math.max(0.18, Math.min(0.88, p.y-offY));
-  if(dragType==='balon'){
-    let kecepatan=Math.abs(dragObj.x-oldX)+Math.abs(dragObj.y-oldY);
-    let diSweater=dragObj.x>sweater.x-sweater.w/2-0.05 && dragObj.x<sweater.x+sweater.w/2+0.05 && dragObj.y>sweater.y-sweater.h/2-0.05 && dragObj.y<sweater.y+sweater.h/2+0.05;
-    if(diSweater && kecepatan>0.002 && dragObj.elektron<16 && Math.random()<0.6){
-      dragObj.elektron++;
-      let idx=sweater.charges.findIndex(c=>c.type==='-');
-      if(idx!==-1){ let c=sweater.charges[idx]; sweater.charges.splice(idx,1); elektronTerbang.push({x:sweater.x, y:sweater.y, tx:dragObj.x, ty:dragObj.y, progress:0}); }
-      if(dragObj.elektron===13) showPesan('🔥 Balon wis negatif! Tempelke neng dinding!');
-    }
-  }
-}
-cv.addEventListener('touchend', selesai);
-cv.addEventListener('mouseup', selesai);
-function selesai(){
-  if(dragObj && dragType==='balon'){
-    dragObj.drag=false;
-    let muatan=dragObj.elektron-dragObj.proton;
-    if(dragObj.x>0.78 && muatan>=3){ dragObj.nempel=true; dragObj.x=0.84; showPesan('🎉 BALON NEMPEL! Induksi berhasil!'); }
-    else if(dragObj.x>0.78 && muatan<3){ showPesan('❌ Durung cukup negatif. Gosok dulu!'); }
-  }
-  dragObj=null; dragType=null;
-}
-cv.addEventListener('dblclick', (e)=>{
-  if(mode==='dinamis'){
-    let p=getPos(e);
-    for(let i=komponen.length-1;i>=0;i--){
-      let k=komponen[i];
-      if(Math.abs(p.x-k.x)<0.07 && Math.abs(p.y-k.y)<0.07){ komponen.splice(i,1); showPesan('🗑️ Komponen dihapus (klik 2x)'); break; }
-    }
-  }
-});
 
-// ===== GAMBAR =====
-let waktu=0;
-function gambar(){
-  waktu+=0.016;
-  ctx.clearRect(0,0,W,H);
-  if(mode==='dinamis') gambarDinamis();
-  else gambarStatis();
-}
-function gambarDinamis(){
-  // Papan
-  ctx.fillStyle='#e8f5e9'; ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='#2e7d32'; ctx.font='bold 13px Arial'; ctx.textAlign='center';
-  ctx.fillText('🔌 PAPAN RANGKAIAN - Klik saklar neng gambar gawe ON/OFF • Seret komponen custom', W/2, 28);
-  // Rangkaian utama - kotak
-  let x1=0.12*W, y1=0.22*H, x2=0.88*W, y2=0.78*H;
-  ctx.strokeStyle='#333'; ctx.lineWidth=4; ctx.strokeRect(x1,y1,x2-x1,y2-y1);
-  // Kabel - dengan elektron yang jalan
-  let {I}=hitung();
-  let kecepatanElektron = I*2;
-  // Update elektron
-  if(saklarOn && !lampuPedot && I>0.01){
-    if(elektron.length<Math.floor(I*30)+5) elektron.push({pos:Math.random()});
-    for(let e of elektron){ e.pos+=0.002+kecepatanElektron*0.002; if(e.pos>1) e.pos=0; }
-  }else elektron=[];
-  // Gambar jalur + elektron
-  let jalur=[
-    {x:x1,y:y1},{x:x2,y:y1},{x:x2,y:y2},{x:x1,y:y2}
-  ];
-  ctx.strokeStyle='#333'; ctx.lineWidth=3;
-  // Elektron biru di sepanjang kotak
-  for(let e of elektron){
-    let p=posisiJalur(e.pos, jalur);
-    ctx.fillStyle='#1565c0'; ctx.beginPath(); ctx.arc(p.x,p.y,6,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#fff'; ctx.font='bold 8px Arial'; ctx.textAlign='center'; ctx.fillText('-',p.x,p.y+3);
-  }
-  // BATERAI kiri atas
-  let bx=(x1+x2)/2*0.28, by=y1;
-  // Baterai di sisi atas kiri
-  ctx
+    // =========================================================================
+    // BAGIAN 1: SIMULASI LISTRIK STATIS (BALON, SWETER, DINDING)
+    // =========================================================================
+    const staticCanvas = document.getElementById('staticCanvas');
+    const sCtx = staticCanvas.getContext('2d');
+    const staticContainer = document.getElementById('static-canvas-container');
+
+    const staticState = {
+      width: 800,
+      height: 500,
+      chargeMode: 'all', // 'all' | 'diff' | 'none'
+      twoBalloons: false,
+      showForceVectors: true,
+      hasWall: true,
+      frictionStrength: 0.5, // 0.1 - 1.0
+      sweater: {
+        x: 35,
+        y: 65,
+        w: 175,
+        h: 340,
+        charges: [], // { rx, ry, hasElectron }
+      },
+      wall: {
+        x: 680,
+        y: 35,
+        w: 85,
+        h: 410,
+        charges: [], // { rx, ry, shiftX }
+      },
+      balloons: [],
+      draggingBalloon: null,
+      dragOffset: { x: 0, y: 0 },
+      lastDragPos: { x: 0, y: 0 },
+    };
+
+    function initStaticEntities() {
+      // Inisialisasi muatan pada sweter (5x9 = 45 pasangan muatan)
+      staticState.sweater.charges = [];
+      const rows = 9;
+      const cols = 5;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          staticState.sweater.charges.push({
+            rx: (c + 0.7) / (cols + 0.4),
+            ry: (r + 0.7) / (rows + 0.4),
+            hasElectron: true,
+          });
+        }
+      }
+
+      // Inisialisasi muatan pada dinding (3x10 = 30 pasangan muatan)
+      staticState.wall.charges = [];
+      const wRows = 10;
+      const wCols = 3;
+      for (let r = 0; r < wRows; r++) {
+        for (let c = 0; c < wCols; c++) {
+          staticState.wall.charges.push({
+            rx: (c + 0.6) / (wCols + 0.2),
+            ry: (r + 0.6) / (wRows + 0.2),
+            shiftX: 0,
+          });
+        }
+      }
+
+      // Inisialisasi Balon 1 & Balon 2
+      staticState.balloons = [
+        {
+          id: 1,
+          x: staticState.width * 0.48,
+          y: staticState.height * 0.46,
+          vx: 0,
+          vy: 0,
+          rx: 52,
+          ry: 66,
+          color: '#fbbf24', // Kuning Amber
+          stroke: '#d97706',
+          extraElectrons: 0, // Jumlah elektron berlebih (negatif)
+          basePairs: 6, // Pasangan netral awal
+          active: true,
+          forceVec: { fx: 0, fy: 0 },
+        },
+        {
+          id: 2,
+          x: staticState.width * 0.62,
+          y: staticState.height * 0.56,
+          vx: 0,
+          vy: 0,
+          rx: 52,
+          ry: 66,
+          color: '#10b981', // Hijau Emerald
+          stroke: '#047857',
+          extraElectrons: 0,
+          basePairs: 6,
+          active: staticState.twoBalloons,
+          forceVec: { fx: 0, fy: 0 },
+        },
+      ];
+      updateStaticBadges();
+    }
+
+    function resizeStaticCanvas() {
+      if (!staticContainer) return;
+      const rect = staticContainer.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      const oldW = staticState.width || rect.width;
+      const oldH = staticState.height || rect.height;
+
+      staticCanvas.width = rect.width;
+      staticCanvas.height = rect.height;
+      staticState.width = rect.width;
+      staticState.height = rect.height;
+
+      // Sesuaikan tata letak sweter & dinding secara responsif
+      staticState.sweater.x = Math.max(16, rect.width * 0.04);
+      staticState.sweater.y = Math.max(45, rect.height * 0.12);
+      staticState.sweater.w = Math.min(185, Math.max(115, rect.width * 0.21));
+      staticState.sweater.h = Math.min(360, rect.height * 0.72);
+
+      staticState.wall.w = Math.min(90, Math.max(55, rect.width * 0.1));
+      staticState.wall.x = rect.width - staticState.wall.w - Math.max(16, rect.width * 0.03);
+      staticState.wall.y = Math.max(25, rect.height * 0.07);
+      staticState.wall.h = rect.height - staticState.wall.y * 2;
+
+      // Skala ukuran balon untuk layar kecil
+      const scaleR = rect.width < 520 ? 0.78 : 1;
+      staticState.balloons.forEach((b) => {
+        b.rx = 52 * scaleR;
+        b.ry = 66 * scaleR;
+        b.x = (b.x / oldW) * rect.width;
+        b.y = (b.y / oldH) * rect.height;
+      });
+    }
+
+    function setStaticChargeMode(mode) {
+      staticState.chargeMode = mode;
+    }
+
+    function toggleSecondBalloon(enabled) {
+      staticState.twoBalloons = enabled;
+      if (staticState.balloons[1]) {
+        staticState.balloons[1].active = enabled;
+        if (enabled) {
+          staticState.balloons[1].x = staticState.width * 0.56;
+          staticState.balloons[1].y = staticState.height * 0.52;
+          staticState.balloons[1].vx = 0;
+          staticState.balloons[1].vy = 0;
+        }
+      }
+      document.getElementById('stat-balloon2-badge').classList.toggle('hidden', !enabled);
+      updateStaticBadges();
+    }
+
+    function toggleForceVectors(enabled) {
+      staticState.showForceVectors = enabled;
+    }
+
+    function toggleWall(enabled) {
+      staticState.hasWall = enabled;
+    }
+
+    function updateFrictionStrength(val) {
+      staticState.frictionStrength = parseInt(val, 10) / 100;
+      const label = document.getElementById('friction-val-label');
+      let desc = 'Sedang';
+      if (val < 35) desc = 'Rendah';
+      else if (val > 70) desc = 'Tinggi';
+      label.textContent = `${desc} (${val}%)`;
+    }
+
+    function resetStaticSimulation() {
+      initStaticEntities();
+      resizeStaticCanvas();
+    }
+
+    function updateStaticBadges() {
+      const b1 = staticState.balloons[0];
+      const b2 = staticState.balloons[1];
+      if (!b1) return;
+
+      const totalTransferred = b1.extraElectrons + (b2 && b2.active ? b2.extraElectrons : 0);
+      const swEl = document.getElementById('stat-sweater-charge');
+      const b1El = document.getElementById('stat-balloon1-charge');
+      const b2El = document.getElementById('stat-balloon2-charge');
+
+      swEl.textContent = totalTransferred > 0 ? `+${totalTransferred} (Positif)` : '0 (Netral)';
+      swEl.className =
+        totalTransferred > 0 ? 'font-mono font-bold text-rose-600' : 'font-mono font-bold text-slate-800';
+
+      b1El.textContent = b1.extraElectrons > 0 ? `-${b1.extraElectrons}` : '0';
+      b1El.className =
+        b1.extraElectrons > 0 ? 'font-mono font-bold text-blue-600' : 'font-mono font-bold text-slate-800';
+
+      if (b2) {
+        b2El.textContent = b2.extraElectrons > 0 ? `-${b2.extraElectrons}` : '0';
+        b2El.className =
+          b2.extraElectrons > 0 ? 'font-mono font-bold text-blue-600' : 'font-mono font-bold text-slate-800';
+      }
+    }
+
+    // Fisika & Pergerakan Listrik Statis
+    let frictionAccumulator = 0;
+
+    function updateStaticPhysics() {
+      const sw = staticState.sweater;
+      const wall = staticState.wall;
+      const activeBalloons = staticState.balloons.filter((b) => b.active);
+
+      // 1. Gesekan saat menyeret balon di atas sweter
+      if (staticState.draggingBalloon) {
+        const b = staticState.draggingBalloon;
+        const dx = b.x - staticState.lastDragPos.x;
+        const dy = b.y - staticState.lastDragPos.y;
+        const moveDist = Math.hypot(dx, dy);
+
+        // Cek tumpang tindih dengan sweter
+        const overlapX = b.x + b.rx > sw.x && b.x - b.rx < sw.x + sw.w;
+        const overlapY = b.y + b.ry > sw.y && b.y - b.ry < sw.y + sw.h;
+
+        if (overlapX && overlapY && moveDist > 1.5) {
+          frictionAccumulator += moveDist * staticState.frictionStrength * 0.045;
+          while (frictionAccumulator >= 1) {
+            frictionAccumulator -= 1;
+            // Cari elektron bebas di sweter
+            const available = sw.charges.filter((c) => c.hasElectron);
+            if (available.length > 0 && b.extraElectrons < 24) {
+              // Pilih yang terdekat dengan balon
+              available.sort((a, c2) => {
+                const ax = sw.x + a.rx * sw.w;
+                const ay = sw.y + a.ry * sw.h;
+                const cx = sw.x + c2.rx * sw.w;
+                const cy = sw.y + c2.ry * sw.h;
+                return Math.hypot(ax - b.x, ay - b.y) - Math.hypot(cx - b.x, cy - b.y);
+              });
+              available[0].hasElectron = false;
+              b.extraElectrons += 1;
+              updateStaticBadges();
+            }
+          }
+        }
+        staticState.lastDragPos = { x: b.x, y: b.y };
+      }
+
+      // 2. Polarisai Muatan Dinding (Elektron dinding terdorong menjauh oleh muatan negatif balon)
+      if (staticState.hasWall) {
+        wall.charges.forEach((wc) => {
+          const wx = wall.x + wc.rx * wall.w;
+          const wy = wall.y + wc.ry * wall.h;
+          let targetShift = 0;
+
+          activeBalloons.forEach((b) => {
+            if (b.extraElectrons > 0) {
+              const dist = Math.hypot(wx - b.x, wy - b.y);
+              if (dist < 260) {
+                const push = ((260 - dist) / 260) * (b.extraElectrons / 20) * (wall.w * 0.42);
+                targetShift += push;
+              }
+            }
+          });
+          targetShift = Math.min(wall.w * 0.46, targetShift);
+          wc.shiftX += (targetShift - wc.shiftX) * 0.18;
+        });
+      }
+
+      // 3. Perhitungan Gaya Coulomb & Kinematika Balon
+      const totalSweaterCharge = activeBalloons.reduce((sum, b) => sum + b.extraElectrons, 0);
+      const swCenterX = sw.x + sw.w * 0.72;
+      const swCenterY = sw.y + sw.h * 0.5;
+
+      activeBalloons.forEach((b) => {
+        let fx = 0;
+        let fy = 0;
+        const qBalloon = -b.extraElectrons; // Negatif
+
+        // A. Gaya Tarik ke Sweter (Sweter bermuatan positif +totalSweaterCharge)
+        if (qBalloon < 0 && totalSweaterCharge > 0) {
+          const dx = swCenterX - b.x;
+          const dy = swCenterY - b.y;
+          const dist = Math.max(65, Math.hypot(dx, dy));
+          const mag = (Math.abs(qBalloon) * totalSweaterCharge * 110) / (dist * dist);
+          fx += (dx / dist) * mag;
+          fy += (dy / dist) * mag;
+        }
+
+        // B. Gaya Tarik Induksi ke Dinding (Dipol terinduksi)
+        if (staticState.hasWall && qBalloon < 0) {
+          const distToWall = wall.x - (b.x + b.rx);
+          if (distToWall < 220) {
+            const clampedD = Math.max(12, distToWall + 25);
+            const wallForce = (qBalloon * qBalloon * 55) / (clampedD * clampedD);
+            fx += wallForce;
+          }
+        }
+
+        // C. Gaya Tolak-Menolak Antar Balon (jika 2 balon aktif & bermuatan)
+        activeBalloons.forEach((other) => {
+          if (other.id !== b.id && qBalloon < 0 && other.extraElectrons > 0) {
+            const dx = b.x - other.x;
+            const dy = b.y - other.y;
+            const dist = Math.max(70, Math.hypot(dx, dy));
+            const repel = (Math.abs(qBalloon) * other.extraElectrons * 160) / (dist * dist);
+            fx += (dx / dist) * repel;
+            fy += (dy / dist) * repel;
+          }
+        });
+
+        b.forceVec = { fx, fy };
+
+        // Jika tidak sedang diseret pengguna, terapkan percepatan & batas tumbukan
+        if (staticState.draggingBalloon !== b) {
+          b.vx = (b.vx + fx * 0.14) * 0.86;
+          b.vy = (b.vy + fy * 0.14) * 0.86;
+
+          b.x += b.vx;
+          b.y += b.vy;
+
+          // Batas Dinding Kanan (Menempel pada dinding)
+          if (staticState.hasWall && b.x + b.rx > wall.x) {
+            b.x = wall.x - b.rx;
+            b.vx = 0;
+            b.vy *= 0.7; // Gesekan statis dinding membuat balon menempel
+          }
+
+          // Batas Menempel pada Sweter jika ditarik kuat
+          const sweaterStickX = sw.x + sw.w * 0.78;
+          if (qBalloon < 0 && totalSweaterCharge > 0 && b.x < sweaterStickX && Math.abs(b.y - swCenterY) < sw.h * 0.45) {
+            if (b.x < sw.x + sw.w * 0.45) {
+              b.x = sw.x + sw.w * 0.45;
+              b.vx = 0;
+            }
+            b.vy *= 0.75;
+          }
+
+          // Batas Tepi Kanvas
+          const margin = 12;
+          if (b.x - b.rx < margin) {
+            b.x = margin + b.rx;
+            b.vx = 0;
+          }
+          if (b.x + b.rx > staticState.width - margin) {
+            b.x = staticState.width - margin - b.rx;
+            b.vx = 0;
+          }
+          if (b.y - b.ry < margin) {
+            b.y = margin + b.ry;
+            b.vy = 0;
+          }
+          if (b.y + b.ry > staticState.height - margin - 36) {
+            b.y = staticState.height - margin - 36 - b.ry;
+            b.vy = 0;
+          }
+        }
+      });
+    }
+
+    function drawChargeSymbol(ctx, x, y, type) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, 6.5, 0, Math.PI * 2);
+      ctx.fillStyle = type === '+' ? '#e11d48' : '#2563eb';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(x - 3.2, y);
+      ctx.lineTo(x + 3.2, y);
+      if (type === '+') {
+        ctx.moveTo(x, y - 3.2);
+        ctx.lineTo(x, y + 3.2);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawStaticScene() {
+      const w = staticState.width;
+      const h = staticState.height;
+      sCtx.clearRect(0, 0, w, h);
+
+      // Lantai ringan
+      sCtx.fillStyle = '#e2e8f0';
+      sCtx.fillRect(0, h - 38, w, 38);
+
+      // 1. Gambar Sweter Wol
+      const sw = staticState.sweater;
+      sCtx.save();
+      // Badan sweter dengan tekstur rajutan
+      sCtx.fillStyle = '#c2410c';
+      sCtx.strokeStyle = '#9a3412';
+      sCtx.lineWidth = 3;
+      sCtx.beginPath();
+      sCtx.roundRect(sw.x, sw.y, sw.w, sw.h, 24);
+      sCtx.fill();
+      sCtx.stroke();
+
+      // Kerah & motif garis wol
+      sCtx.fillStyle = '#fdba74';
+      sCtx.beginPath();
+      sCtx.ellipse(sw.x + sw.w / 2, sw.y + 8, sw.w * 0.28, 12, 0, 0, Math.PI * 2);
+      sCtx.fill();
+
+      sCtx.strokeStyle = 'rgba(255,255,255,0.16)';
+      sCtx.lineWidth = 2;
+      for (let yLine = sw.y + 32; yLine < sw.y + sw.h - 15; yLine += 26) {
+        sCtx.beginPath();
+        sCtx.moveTo(sw.x + 12, yLine);
+        sCtx.lineTo(sw.x + sw.w - 12, yLine);
+        sCtx.stroke();
+      }
+
+      // Label Sweter
+      sCtx.fillStyle = '#ffffff';
+      sCtx.font = 'bold 12px Inter, sans-serif';
+      sCtx.textAlign = 'center';
+      sCtx.fillText('SWETER WOL', sw.x + sw.w / 2, sw.y + sw.h + 18);
+
+      // Muatan Sweter
+      if (staticState.chargeMode !== 'none') {
+        sw.charges.forEach((c) => {
+          const cx = sw.x + c.rx * sw.w;
+          const cy = sw.y + c.ry * sw.h;
+          if (staticState.chargeMode === 'all') {
+            drawChargeSymbol(sCtx, cx - 4, cy, '+');
+            if (c.hasElectron) {
+              drawChargeSymbol(sCtx, cx + 4, cy + 2, '-');
+            }
+          } else if (staticState.chargeMode === 'diff') {
+            if (!c.hasElectron) {
+              drawChargeSymbol(sCtx, cx, cy, '+');
+            }
+          }
+        });
+      }
+      sCtx.restore();
+
+      // 2. Gambar Dinding Isolator
+      if (staticState.hasWall) {
+        const wall = staticState.wall;
+        sCtx.save();
+        sCtx.fillStyle = '#fef3c7';
+        sCtx.strokeStyle = '#d97706';
+        sCtx.lineWidth = 2.5;
+        sCtx.beginPath();
+        sCtx.roundRect(wall.x, wall.y, wall.w, wall.h, 12);
+        sCtx.fill();
+        sCtx.stroke();
+
+        // Pola batu bata halus
+        sCtx.strokeStyle = 'rgba(217, 119, 6, 0.18)';
+        sCtx.lineWidth = 1.5;
+        for (let wy = wall.y + 35; wy < wall.y + wall.h; wy += 35) {
+          sCtx.beginPath();
+          sCtx.moveTo(wall.x, wy);
+          sCtx.lineTo(wall.x + wall.w, wy);
+          sCtx.stroke();
+        }
+
+        sCtx.fillStyle = '#92400e';
+        sCtx.font = 'bold 11px Inter, sans-serif';
+        sCtx.textAlign = 'center';
+        sCtx.fillText('DINDING', wall.x + wall.w / 2, wall.y - 8);
+
+        // Muatan Dinding (Terpolarisasi jika didekati balon bermuatan)
+        if (staticState.chargeMode === 'all') {
+          wall.charges.forEach((wc) => {
+            const wx = wall.x + wc.rx * wall.w;
+            const wy = wall.y + wc.ry * wall.h;
+            drawChargeSymbol(sCtx, wx - 4, wy, '+');
+            drawChargeSymbol(sCtx, wx + 4 + wc.shiftX, wy + 2, '-');
+          });
+        } else if (staticState.chargeMode === 'diff') {
+          // Tampilkan efek dipol permukaan jika terpolarisasi kuat
+          wall.charges.forEach((wc) => {
+            if (wc.shiftX > 4) {
+              const wx = wall.x + wc.rx * wall.w;
+              const wy = wall.y + wc.ry * wall.h;
+              drawChargeSymbol(sCtx, wx - 4, wy, '+');
+              drawChargeSymbol(sCtx, wx + 5 + wc.shiftX, wy, '-');
+            }
+          });
+        }
+        sCtx.restore();
+      }
+
+      // 3. Gambar Balon-Balon
+      staticState.balloons.forEach((b) => {
+        if (!b.active) return;
+        sCtx.save();
+
+        // Tali balon
+        sCtx.strokeStyle = '#64748b';
+        sCtx.lineWidth = 2;
+        sCtx.beginPath();
+        sCtx.moveTo(b.x, b.y + b.ry);
+        sCtx.quadraticCurveTo(b.x - 10, b.y + b.ry + 35, b.x + 6, b.y + b.ry + 68);
+        sCtx.stroke();
+
+        // Simpul balon
+        sCtx.fillStyle = b.stroke;
+        sCtx.beginPath();
+        sCtx.moveTo(b.x - 6, b.y + b.ry + 5);
+        sCtx.lineTo(b.x + 6, b.y + b.ry + 5);
+        sCtx.lineTo(b.x, b.y + b.ry - 2);
+        sCtx.closePath();
+        sCtx.fill();
+
+        // Badan Balon
+        const grad = sCtx.createRadialGradient(
+          b.x - b.rx * 0.3,
+          b.y - b.ry * 0.3,
+          8,
+          b.x,
+          b.y,
+          b.ry * 1.15
+        );
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.25, b.color);
+        grad.addColorStop(1, b.stroke);
+
+        sCtx.fillStyle = grad;
+        sCtx.beginPath();
+        sCtx.ellipse(b.x, b.y, b.rx, b.ry, 0, 0, Math.PI * 2);
+        sCtx.fill();
+        sCtx.lineWidth = 2;
+        sCtx.strokeStyle = b.stroke;
+        sCtx.stroke();
+
+        // Muatan pada Balon
+        if (staticState.chargeMode !== 'none') {
+          if (staticState.chargeMode === 'all') {
+            // Gambar pasangan netral awal
+            for (let i = 0; i < b.basePairs; i++) {
+              const angle = (i / b.basePairs) * Math.PI * 2;
+              const px = b.x + Math.cos(angle) * (b.rx * 0.42);
+              const py = b.y + Math.sin(angle) * (b.ry * 0.42);
+              drawChargeSymbol(sCtx, px - 4, py, '+');
+              drawChargeSymbol(sCtx, px + 4, py + 2, '-');
+            }
+          }
+          // Gambar elektron berlebih hasil gesekan di permukaan balon
+          for (let j = 0; j < b.extraElectrons; j++) {
+            const angle = (j / Math.max(1, b.extraElectrons)) * Math.PI * 2 - Math.PI / 2;
+            const ex = b.x + Math.cos(angle) * (b.rx * 0.74);
+            const ey = b.y + Math.sin(angle) * (b.ry * 0.74);
+            drawChargeSymbol(sCtx, ex, ey, '-');
+          }
+        }
+
+        // Vektor Gaya (Panah Merah/Biru)
+        if (staticState.showForceVectors) {
+          const fMag = Math.hypot(b.forceVec.fx, b.forceVec.fy);
+          if (fMag > 0.25) {
+            const arrowLen = Math.min(115, 22 + fMag * 12);
+            const ux = b.forceVec.fx / fMag;
+            const uy = b.forceVec.fy / fMag;
+            const startX = b.x;
+            const startY = b.y - b.ry - 14;
+            const endX = startX + ux * arrowLen;
+            const endY = startY + uy * arrowLen;
+
+            sCtx.strokeStyle = '#dc2626';
+            sCtx.fillStyle = '#dc2626';
+            sCtx.lineWidth = 3.5;
+            sCtx.beginPath();
+            sCtx.moveTo(startX, startY);
+            sCtx.lineTo(endX, endY);
+            sCtx.stroke();
+
+            // Kepala panah
+            const headAngle = Math.atan2(uy, ux);
+            sCtx.beginPath();
+            sCtx.moveTo(endX, endY);
+            sCtx.lineTo(endX - 10 * Math.cos(headAngle - 0.45), endY - 10 * Math.sin(headAngle - 0.45));
+            sCtx.lineTo(endX - 10 * Math.cos(headAngle + 0.45), endY - 10 * Math.sin(headAngle + 0.45));
+            sCtx.closePath();
+            sCtx.fill();
+
+            sCtx.font = 'bold 11px Inter, sans-serif';
+            sCtx.textAlign = 'center';
+            sCtx.fillText('F', endX, endY - 8);
+          }
+        }
+
+        sCtx.restore();
+      });
+    }
+
+    // Event Listener Mouse & Sentuh untuk Balon
+    function getCanvasPointerPos(canvas, evt) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+      const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+      return {
+        x: clientX - rect.left,
+        y: clientY - rect.top,
+      };
+    }
+
+    function onStaticDown(evt) {
+      const pos = getCanvasPointerPos(staticCanvas, evt);
+      // Cek dari balon teratas (terakhir dirender)
+      for (let i = staticState.balloons.length - 1; i >= 0; i--) {
+        const b = staticState.balloons[i];
+        if (!b.active) continue;
+        const norm = ((pos.x - b.x) ** 2) / (b.rx ** 2) + ((pos.y - b.y) ** 2) / (b.ry ** 2);
+        if (norm <= 1.15) {
+          staticState.draggingBalloon = b;
+          staticState.dragOffset = { x: pos.x - b.x, y: pos.y - b.y };
+          staticState.lastDragPos = { x: b.x, y: b.y };
+          b.vx = 0;
+          b.vy = 0;
+          staticCanvas.style.cursor = 'grabbing';
+          break;
+        }
+      }
+    }
+
+    function onStaticMove(evt) {
+      const pos = getCanvasPointerPos(staticCanvas, evt);
+      if (staticState.draggingBalloon) {
+        evt.preventDefault();
+        const b = staticState.draggingBalloon;
+        b.x = Math.max(b.rx, Math.min(staticState.width - b.rx, pos.x - staticState.dragOffset.x));
+        b.y = Math.max(b.ry, Math.min(staticState.height - b.ry - 38, pos.y - staticState.dragOffset.y));
+      } else {
+        // Ubah kursor hover
+        let overBalloon = false;
+        staticState.balloons.forEach((b) => {
+          if (!b.active) return;
+          const norm = ((pos.x - b.x) ** 2) / (b.rx ** 2) + ((pos.y - b.y) ** 2) / (b.ry ** 2);
+          if (norm <= 1.1) overBalloon = true;
+        });
+        staticCanvas.style.cursor = overBalloon ? 'grab' : 'default';
+      }
+    }
+
+    function onStaticUp() {
+      staticState.draggingBalloon = null;
+      staticCanvas.style.cursor = 'default';
+    }
+
+    staticCanvas.addEventListener('mousedown', onStaticDown);
+    staticCanvas.addEventListener('mousemove', onStaticMove);
+    window.addEventListener('mouseup', onStaticUp);
+    staticCanvas.addEventListener('touchstart', onStaticDown, { passive: false });
+    staticCanvas.addEventListener('touchmove', onStaticMove, { passive: false });
+    window.addEventListener('touchend', onStaticUp);
+
+    // =========================================================================
+    // BAGIAN 2: SIMULASI LISTRIK DINAMIS (RANGKAIAN DC + SOLVER MNA)
+    // =========================================================================
+    const dynCanvas = document.getElementById('dynamicCanvas');
+    const dCtx = dynCanvas.getContext('2d');
+    const dynContainer = document.getElementById('dynamic-canvas-container');
+
+    const dynOptions = {
+      showValues: true,
+      schematic: false,
+      electronFlow: true, // true = elektron (-), false = arus konvensional (+)
+      voltmeterActive: false,
+    };
+
+    // Struktur Data Rangkaian:
+    // nodes: [{ id, x, y }]
+    // components: [{ id, type, n1, n2, voltage, internalR, resistance, closed, current, vDrop, power, electronOffset }]
+    let circuitNodes = [];
+    let circuitComponents = [];
+    let nextNodeId = 1;
+    let nextCompId = 1;
+    let selectedCompId = null;
+    let isShortCircuit = false;
+
+    // State Interaksi Papan Rangkaian
+    let dragTarget = null; // { kind: 'node' | 'comp' | 'probePos' | 'probeNeg', id, offsetX, offsetY }
+    let snapHighlightNodeId = null;
+
+    // Voltmeter Probes
+    const voltmeterProbes = {
+      pos: { x: 260, y: 120, color: '#ef4444', label: '+' },
+      neg: { x: 340, y: 120, color: '#1e293b', label: '−' },
+    };
+
+    // Daftar Node Potensial hasil MNA
+    let nodeVoltages = {}; // nodeId -> Voltage
+
+    function createNode(x, y) {
+      const node = { id: nextNodeId++, x, y };
+      circuitNodes.push(node);
+      return node;
+    }
+
+    function createComponent(type, n1Id, n2Id, customProps = {}) {
+      const defaults = {
+        wire: { resistance: 0.001 },
+        battery: { voltage: 9, internalR: 0.5 },
+        resistor: { resistance: 10 },
+        bulb: { resistance: 15 },
+        switch: { closed: true, resistance: 0.001 },
+        ammeter: { resistance: 0.001 },
+      };
+
+      const comp = {
+        id: nextCompId++,
+        type,
+        n1: n1Id,
+        n2: n2Id,
+        ...defaults[type],
+        ...customProps,
+        current: 0,
+        vDrop: 0,
+        power: 0,
+        electronPhase: 0,
+      };
+      circuitComponents.push(comp);
+      return comp;
+    }
+
+    function addCircuitComponent(type) {
+      const cx = (dynCanvas.width || 600) * 0.5 + (Math.random() - 0.5) * 80;
+      const cy = (dynCanvas.height || 420) * 0.48 + (Math.random() - 0.5) * 60;
+      const n1 = createNode(cx - 55, cy);
+      const n2 = createNode(cx + 55, cy);
+      const comp = createComponent(type, n1.id, n2.id);
+      selectComponent(comp.id);
+      solveCircuitMNA();
+    }
+
+    // Preset Rangkaian Siap Pakai
+    function loadCircuitPreset(presetName) {
+      circuitNodes = [];
+      circuitComponents = [];
+      nextNodeId = 1;
+      nextCompId = 1;
+      selectedCompId = null;
+      nodeVoltages = {};
+
+      const w = dynCanvas.width || 650;
+      const h = dynCanvas.height || 440;
+      const left = Math.max(90, w * 0.22);
+      const right = Math.min(w - 90, w * 0.78);
+      const top = Math.max(85, h * 0.24);
+      const bottom = Math.min(h - 85, h * 0.76);
+      const midX = (left + right) / 2;
+      const midY = (top + bottom) / 2;
+
+      if (presetName === 'series') {
+        // Rangkaian Seri: Baterai di kiri, Sakelar & Amperemeter di atas, 2 Lampu di kanan & bawah
+        const nBL = createNode(left, bottom);
+        const nTL = createNode(left, top);
+        const nTM = createNode(midX, top);
+        const nTR = createNode(right, top);
+        const nBR = createNode(right, bottom);
+        const nBM = createNode(midX, bottom);
+
+        const bat = createComponent('battery', nBL.id, nTL.id, { voltage: 12, internalR: 0.5 });
+        createComponent('switch', nTL.id, nTM.id, { closed: true });
+        createComponent('ammeter', nTM.id, nTR.id);
+        createComponent('bulb', nTR.id, nBR.id, { resistance: 10 });
+        createComponent('bulb', nBR.id, nBM.id, { resistance: 20 });
+        createComponent('wire', nBM.id, nBL.id);
+        selectComponent(bat.id);
+      } else if (presetName === 'parallel') {
+        // Rangkaian Paralel: Baterai di kiri, 2 cabang lampu & resistor paralel
+        const nBL = createNode(left, bottom);
+        const nTL = createNode(left, top);
+        const nT1 = createNode(midX, top);
+        const nB1 = createNode(midX, bottom);
+        const nT2 = createNode(right, top);
+        const nB2 = createNode(right, bottom);
+
+        const bat = createComponent('battery', nBL.id, nTL.id, { voltage: 9, internalR: 0.2 });
+        createComponent('wire', nTL.id, nT1.id);
+        createComponent('bulb', nT1.id, nB1.id, { resistance: 15 });
+        createComponent('wire', nT1.id, nT2.id);
+        createComponent('resistor', nT2.id, nB2.id, { resistance: 30 });
+        createComponent('wire', nB2.id, nB1.id);
+        createComponent('wire', nB1.id, nBL.id);
+        selectComponent(bat.id);
+      } else if (presetName === 'mixed') {
+        // Rangkaian Campuran (Seri + Paralel)
+        const nBL = createNode(left, bottom);
+        const nTL = createNode(left, top);
+        const nTM = createNode(midX, top);
+        const nBM = createNode(midX, bottom);
+        const nTR = createNode(right, top);
+        const nBR = createNode(right, bottom);
+
+        const bat = createComponent('battery', nBL.id, nTL.id, { voltage: 18, internalR: 0.5 });
+        createComponent('resistor', nTL.id, nTM.id, { resistance: 6 });
+        createComponent('bulb', nTM.id, nBM.id, { resistance: 12 });
+        createComponent('wire', nTM.id, nTR.id);
+        createComponent('bulb', nTR.id, nBR.id, { resistance: 12 });
+        createComponent('wire', nBR.id, nBM.id);
+        createComponent('wire', nBM.id, nBL.id);
+        selectComponent(bat.id);
+      } else {
+        selectComponent(null);
+      }
+
+      solveCircuitMNA();
+      updateInspectorUI();
+    }
+
+    function resetDynamicCircuit() {
+      loadCircuitPreset('empty');
+    }
+
+    // =========================================================================
+    // SOLVER RANGKAIAN LISTRIK REAL-TIME (MODIFIED NODAL ANALYSIS / MNA)
+    // =========================================================================
+    function solveCircuitMNA() {
+      isShortCircuit = false;
+      // Reset nilai arus & tegangan komponen
+      circuitComponents.forEach((c) => {
+        c.current = 0;
+        c.vDrop = 0;
+        c.power = 0;
+      });
+      nodeVoltages = {};
+
+      if (circuitNodes.length === 0 || circuitComponents.length === 0) {
+        updateInspectorLiveValues();
+        updateVoltmeterDisplay();
+        return;
+      }
+
+      // Cari komponen yang aktif menghantarkan arus
+      const activeComps = circuitComponents.filter((c) => !(c.type === 'switch' && !c.closed));
+      if (activeComps.length === 0) {
+        updateInspectorLiveValues();
+        updateVoltmeterDisplay();
+        return;
+      }
+
+      // Temukan komponen terhubung (Connected Components) untuk menetapkan referensi ground (0V) pada tiap pulau
+      const adj = {};
+      circuitNodes.forEach((n) => (adj[n.id] = []));
+      activeComps.forEach((c) => {
+        if (adj[c.n1] && adj[c.n2]) {
+          adj[c.n1].push(c.n2);
+          adj[c.n2].push(c.n1);
+        }
+      });
+
+      const visited = new Set();
+      const groundNodes = new Set();
+
+      circuitNodes.forEach((n) => {
+        if (!visited.has(n.id)) {
+          // BFS menandai satu pulau rangkaian
+          const queue = [n.id];
+          visited.add(n.id);
+          // Prioritaskan kutub negatif baterai (n1) sebagai ground 0V jika ada
+          let chosenGround = n.id;
+          while (queue.length > 0) {
+            const curr = queue.shift();
+            const batNeg = activeComps.find((c) => c.type === 'battery' && c.n1 === curr);
+            if (batNeg) chosenGround = curr;
+            for (const nxt of adj[curr]) {
+              if (!visited.has(nxt)) {
+                visited.add(nxt);
+                queue.push(nxt);
+              }
+            }
+          }
+          groundNodes.add(chosenGround);
+        }
+      });
+
+      // Pemetaan indeks variabel MNA:
+      // Variabel 0..N-1 adalah tegangan simpul non-ground
+      const nonGroundNodes = circuitNodes.filter((n) => !groundNodes.has(n.id));
+      const nodeIndex = {};
+      nonGroundNodes.forEach((n, idx) => (nodeIndex[n.id] = idx));
+
+      // Sumber tegangan ideal (baterai dengan internalR == 0) memerlukan variabel arus tambahan di MNA
+      const idealBatteries = activeComps.filter((c) => c.type === 'battery' && (c.internalR || 0) <= 0.001);
+      const numV = nonGroundNodes.length;
+      const numI = idealBatteries.length;
+      const dim = numV + numI;
+
+      if (dim === 0) {
+        circuitNodes.forEach((n) => (nodeVoltages[n.id] = 0));
+        updateInspectorLiveValues();
+        updateVoltmeterDisplay();
+        return;
+      }
+
+      // Matriks A (dim x dim) dan Vektor b (dim)
+      const A = Array.from({ length: dim }, () => new Array(dim).fill(0));
+      const b = new Array(dim).fill(0);
+
+      // Tambahkan konduktansi bocor kecil (GMIN) pada setiap node agar matriks tidak singular
+      const GMIN = 1e-9;
+      for (let i = 0; i < numV; i++) {
+        A[i][i] += GMIN;
+      }
+
+      // Isi matriks berdasarkan komponen
+      activeComps.forEach((c) => {
+        const idx1 = nodeIndex[c.n1]; // undefined jika ground
+        const idx2 = nodeIndex[c.n2];
+
+        if (c.type === 'battery' && (c.internalR || 0) > 0.001) {
+          // Model Norton untuk baterai berhambatan dalam: G = 1/r, sumber arus I = V/r dari n1 ke n2
+          const g = 1 / c.internalR;
+          const iSrc = c.voltage * g;
+          if (idx1 !== undefined) {
+            A[idx1][idx1] += g;
+            b[idx1] -= iSrc;
+          }
+          if (idx2 !== undefined) {
+            A[idx2][idx2] += g;
+            b[idx2] += iSrc;
+          }
+          if (idx1 !== undefined && idx2 !== undefined) {
+            A[idx1][idx2] -= g;
+            A[idx2][idx1] -= g;
+          }
+        } else if (c.type !== 'battery') {
+          // Elemen resistif (resistor, lampu, kabel, sakelar tertutup, amperemeter)
+          const r = Math.max(0.0005, c.resistance || 0.001);
+          const g = 1 / r;
+          if (idx1 !== undefined) A[idx1][idx1] += g;
+          if (idx2 !== undefined) A[idx2][idx2] += g;
+          if (idx1 !== undefined && idx2 !== undefined) {
+            A[idx1][idx2] -= g;
+            A[idx2][idx1] -= g;
+          }
+        }
+      });
+
+      // Isi persamaan sumber tegangan ideal (V_n2 - V_n1 = V_bat)
+      idealBatteries.forEach((bat, k) => {
+        const row = numV + k;
+        const idx1 = nodeIndex[bat.n1];
+        const idx2 = nodeIndex[bat.n2];
+        if (idx2 !== undefined) {
+          A[row][idx2] += 1;
+          A[idx2][row] += 1;
+        }
+        if (idx1 !== undefined) {
+          A[row][idx1] -= 1;
+          A[idx1][row] -= 1;
+        }
+        b[row] = bat.voltage;
+      });
+
+      // Selesaikan sistem persamaan linear A * x = b dengan Eliminasi Gauss (Partial Pivoting)
+      const x = gaussianElimination(A, b);
+
+      // Simpan hasil tegangan simpul
+      groundNodes.forEach((gId) => (nodeVoltages[gId] = 0));
+      nonGroundNodes.forEach((n, idx) => {
+        nodeVoltages[n.id] = isFinite(x[idx]) ? x[idx] : 0;
+      });
+
+      // Hitung arus, beda potensial, dan daya pada tiap komponen
+      activeComps.forEach((c) => {
+        const v1 = nodeVoltages[c.n1] || 0;
+        const v2 = nodeVoltages[c.n2] || 0;
+        c.vDrop = v2 - v1;
+
+        if (c.type === 'battery') {
+          const idealIdx = idealBatteries.indexOf(c);
+          if (idealIdx !== -1) {
+            // Arus keluar dari kutub positif (n2)
+            c.current = -x[numV + idealIdx];
+          } else {
+            // I keluar dari n2 = (V_emf - (v2 - v1)) / r_internal
+            c.current = (c.voltage - (v2 - v1)) / c.internalR;
+          }
+          c.power = Math.abs(c.voltage * c.current);
+        } else {
+          const r = Math.max(0.0005, c.resistance || 0.001);
+          // Arus konvensional dari n1 ke n2
+          c.current = (v1 - v2) / r;
+          c.power = c.current * c.current * r;
+        }
+
+        if (Math.abs(c.current) > 85) {
+          isShortCircuit = true;
+        }
+      });
+
+      // Tampilkan peringatan korsleting jika arus sangat besar
+      const banner = document.getElementById('short-circuit-banner');
+      banner.classList.toggle('hidden', !isShortCircuit);
+
+      updateInspectorLiveValues();
+      updateVoltmeterDisplay();
+    }
+
+    function gaussianElimination(A, b) {
+      const n = b.length;
+      const M = A.map((row, i) => [...row, b[i]]);
+
+      for (let i = 0; i < n; i++) {
+        // Cari pivot terbesar
+        let maxRow = i;
+        for (let k = i + 1; k < n; k++) {
+          if (Math.abs(M[k][i]) > Math.abs(M[maxRow][i])) {
+            maxRow = k;
+          }
+        }
+        [M[i], M[maxRow]] = [M[maxRow], M[i]];
+
+        if (Math.abs(M[i][i]) < 1e-12) continue;
+
+        for (let k = i + 1; k < n; k++) {
+          const factor = M[k][i] / M[i][i];
+          for (let j = i; j <= n; j++) {
+            M[k][j] -= factor * M[i][j];
+          }
+        }
+      }
+
+      const x = new Array(n).fill(0);
+      for (let i = n - 1; i >= 0; i--) {
+        if (Math.abs(M[i][i]) < 1e-12) {
+          x[i] = 0;
+          continue;
+        }
+        let sum = M[i][n];
+        for (let j = i + 1; j < n; j++) {
+          sum -= M[i][j] * x[j];
+        }
+        x[i] = sum / M[i][i];
+      }
+      return x;
+    }
+
+    // =========================================================================
+    // KONTROL INSPEKTOR & KUSTOMISASI NILAI KOMPONEN
+    // =========================================================================
+    function selectComponent(compId) {
+      selectedCompId = compId;
+      updateInspectorUI();
+    }
+
+    function getSelectedComponent() {
+      return circuitComponents.find((c) => c.id === selectedCompId) || null;
+    }
+
+    function updateInspectorUI() {
+      const comp = getSelectedComponent();
+      const emptyBox = document.getElementById('inspector-empty');
+      const ctrlBox = document.getElementById('inspector-controls');
+
+      if (!comp) {
+        emptyBox.classList.remove('hidden');
+        ctrlBox.classList.add('hidden');
+        ctrlBox.classList.remove('flex');
+        return;
+      }
+
+      emptyBox.classList.add('hidden');
+      ctrlBox.classList.remove('hidden');
+      ctrlBox.classList.add('flex');
+
+      const names = {
+        wire: 'Kabel Penghantar',
+        battery: 'Baterai DC',
+        bulb: 'Lampu Bohlam',
+        resistor: 'Resistor Tetap',
+        switch: 'Sakelar',
+        ammeter: 'Amperemeter',
+      };
+
+      document.getElementById('insp-comp-name').textContent = names[comp.type] || comp.type;
+      document.getElementById('insp-comp-badge').textContent = `#${comp.id}`;
+
+      const vGroup = document.getElementById('ctrl-voltage-group');
+      const irGroup = document.getElementById('ctrl-internal-r-group');
+      const rGroup = document.getElementById('ctrl-resistance-group');
+      const swGroup = document.getElementById('ctrl-switch-group');
+
+      vGroup.classList.add('hidden');
+      irGroup.classList.add('hidden');
+      rGroup.classList.add('hidden');
+      swGroup.classList.add('hidden');
+
+      if (comp.type === 'battery') {
+        vGroup.classList.remove('hidden');
+        irGroup.classList.remove('hidden');
+
+        const vNum = document.getElementById('insp-voltage-num');
+        const vRng = document.getElementById('insp-voltage-range');
+        vNum.value = comp.voltage;
+        vRng.value = comp.voltage;
+
+        const irNum = document.getElementById('insp-internal-r-num');
+        const irRng = document.getElementById('insp-internal-r-range');
+        irNum.value = comp.internalR;
+        irRng.value = comp.internalR;
+      } else if (comp.type === 'resistor' || comp.type === 'bulb') {
+        rGroup.classList.remove('hidden');
+        document.getElementById('insp-resistance-label').textContent =
+          comp.type === 'bulb' ? 'Hambatan Lampu (R)' : 'Hambatan Resistor (R)';
+        const rNum = document.getElementById('insp-resistance-num');
+        const rRng = document.getElementById('insp-resistance-range');
+        rNum.value = comp.resistance;
+        rRng.value = comp.resistance;
+      } else if (comp.type === 'switch') {
+        swGroup.classList.remove('hidden');
+        updateSwitchButtonVisual(comp);
+      }
+
+      updateInspectorLiveValues();
+    }
+
+    function updateSwitchButtonVisual(comp) {
+      const btn = document.getElementById('insp-switch-toggle-btn');
+      if (comp.closed) {
+        btn.textContent = '✅ Tertutup (Arus Mengalir)';
+        btn.className = 'w-full py-2.5 px-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white';
+      } else {
+        btn.textContent = '⭕ Terbuka (Rangkaian Putus)';
+        btn.className = 'w-full py-2.5 px-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-700 text-white';
+      }
+    }
+
+    function updateInspectorLiveValues() {
+      const comp = getSelectedComponent();
+      if (!comp) return;
+      document.getElementById('insp-read-current').textContent = `${Math.abs(comp.current).toFixed(2)} A`;
+      document.getElementById('insp-read-voltage').textContent = `${Math.abs(comp.vDrop).toFixed(2)} V`;
+      document.getElementById('insp-read-power').textContent = `${comp.power.toFixed(2)} W`;
+    }
+
+    // Bind input slider & angka inspektor
+    function bindInspectorInputs() {
+      const vNum = document.getElementById('insp-voltage-num');
+      const vRng = document.getElementById('insp-voltage-range');
+      const syncV = (val) => {
+        const comp = getSelectedComponent();
+        if (!comp || comp.type !== 'battery') return;
+        const clamped = Math.max(0, Math.min(120, parseFloat(val) || 0));
+        comp.voltage = clamped;
+        vNum.value = clamped;
+        vRng.value = clamped;
+        solveCircuitMNA();
+      };
+      vNum.addEventListener('input', (e) => syncV(e.target.value));
+      vRng.addEventListener('input', (e) => syncV(e.target.value));
+
+      const irNum = document.getElementById('insp-internal-r-num');
+      const irRng = document.getElementById('insp-internal-r-range');
+      const syncIR = (val) => {
+        const comp = getSelectedComponent();
+        if (!comp || comp.type !== 'battery') return;
+        const clamped = Math.max(0, Math.min(10, parseFloat(val) || 0));
+        comp.internalR = clamped;
+        irNum.value = clamped;
+        irRng.value = clamped;
+        solveCircuitMNA();
+      };
+      irNum.addEventListener('input', (e) => syncIR(e.target.value));
+      irRng.addEventListener('input', (e) => syncIR(e.target.value));
+
+      const rNum = document.getElementById('insp-resistance-num');
+      const rRng = document.getElementById('insp-resistance-range');
+      const syncR = (val) => {
+        const comp = getSelectedComponent();
+        if (!comp || (comp.type !== 'resistor' && comp.type !== 'bulb')) return;
+        const clamped = Math.max(1, Math.min(100, parseFloat(val) || 1));
+        comp.resistance = clamped;
+        rNum.value = clamped;
+        rRng.value = clamped;
+        solveCircuitMNA();
+      };
+      rNum.addEventListener('input', (e) => syncR(e.target.value));
+      rRng.addEventListener('input', (e) => syncR(e.target.value));
+    }
+
+    function toggleSelectedSwitch() {
+      const comp = getSelectedComponent();
+      if (!comp || comp.type !== 'switch') return;
+      comp.closed = !comp.closed;
+      updateSwitchButtonVisual(comp);
+      solveCircuitMNA();
+    }
+
+    function detachSelectedComponent() {
+      const comp = getSelectedComponent();
+      if (!comp) return;
+      const oldN1 = circuitNodes.find((n) => n.id === comp.n1);
+      const oldN2 = circuitNodes.find((n) => n.id === comp.n2);
+      if (oldN1) {
+        const new1 = createNode(oldN1.x + 12, oldN1.y + 12);
+        comp.n1 = new1.id;
+      }
+      if (oldN2) {
+        const new2 = createNode(oldN2.x + 12, oldN2.y + 12);
+        comp.n2 = new2.id;
+      }
+      cleanupUnusedNodes();
+      solveCircuitMNA();
+    }
+
+    function deleteSelectedComponent() {
+      if (!selectedCompId) return;
+      circuitComponents = circuitComponents.filter((c) => c.id !== selectedCompId);
+      selectedCompId = null;
+      cleanupUnusedNodes();
+      updateInspectorUI();
+      solveCircuitMNA();
+    }
+
+    function cleanupUnusedNodes() {
+      const usedIds = new Set();
+      circuitComponents.forEach((c) => {
+        usedIds.add(c.n1);
+        usedIds.add(c.n2);
+      });
+      circuitNodes = circuitNodes.filter((n) => usedIds.has(n.id));
+    }
+
+    function toggleCurrentDirectionMode() {
+      dynOptions.electronFlow = !dynOptions.electronFlow;
+      const dot = document.getElementById('current-mode-dot');
+      const label = document.getElementById('current-mode-label');
+      if (dynOptions.electronFlow) {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-blue-600';
+        label.textContent = 'Aliran Elektron (−)';
+      } else {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-rose-600';
+        label.textContent = 'Arus Konvensional (+)';
+      }
+    }
+
+    function toggleVoltmeter() {
+      dynOptions.voltmeterActive = !dynOptions.voltmeterActive;
+      const card = document.getElementById('voltmeter-readout-card');
+      card.classList.toggle('hidden', !dynOptions.voltmeterActive);
+      if (dynOptions.voltmeterActive) {
+        voltmeterProbes.pos.x = (dynCanvas.width || 600) * 0.42;
+        voltmeterProbes.pos.y = (dynCanvas.height || 420) * 0.35;
+        voltmeterProbes.neg.x = (dynCanvas.width || 600) * 0.58;
+        voltmeterProbes.neg.y = (dynCanvas.height || 420) * 0.35;
+        updateVoltmeterDisplay();
+      }
+    }
+
+    function sampleVoltageAtPoint(px, py) {
+      // Cek kedekatan dengan node terlebih dahulu
+      for (const n of circuitNodes) {
+        if (Math.hypot(n.x - px, n.y - py) <= 22) {
+          return { connected: true, v: nodeVoltages[n.id] ?? 0 };
+        }
+      }
+      // Cek kedekatan dengan segmen komponen (interpolasi linear potensial)
+      for (const c of circuitComponents) {
+        const n1 = circuitNodes.find((n) => n.id === c.n1);
+        const n2 = circuitNodes.find((n) => n.id === c.n2);
+        if (!n1 || !n2) continue;
+        const proj = pointToSegmentProjection(px, py, n1.x, n1.y, n2.x, n2.y);
+        if (proj.dist <= 16) {
+          const v1 = nodeVoltages[n1.id] ?? 0;
+          const v2 = nodeVoltages[n2.id] ?? 0;
+          return { connected: true, v: v1 + (v2 - v1) * proj.t };
+        }
+      }
+      return { connected: false, v: 0 };
+    }
+
+    function updateVoltmeterDisplay() {
+      if (!dynOptions.voltmeterActive) return;
+      const pPos = sampleVoltageAtPoint(voltmeterProbes.pos.x, voltmeterProbes.pos.y);
+      const pNeg = sampleVoltageAtPoint(voltmeterProbes.neg.x, voltmeterProbes.neg.y);
+      const display = document.getElementById('voltmeter-display-val');
+
+      if (pPos.connected && pNeg.connected) {
+        const diff = pPos.v - pNeg.v;
+        display.textContent = `${diff.toFixed(2)} V`;
+      } else {
+        display.textContent = '? . ?? V';
+      }
+    }
+
+    // =========================================================================
+    // RENDERING PAPAN KERJA LISTRIK DINAMIS
+    // =========================================================================
+    function resizeDynamicCanvas() {
+      if (!dynContainer) return;
+      const rect = dynContainer.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      dynCanvas.width = rect.width;
+      dynCanvas.height = rect.height;
+    }
+
+    function drawDynamicScene(dt) {
+      const w = dynCanvas.width;
+      const h = dynCanvas.height;
+      dCtx.clearRect(0, 0, w, h);
+
+      // 1. Gambar Grid Papan Kerja
+      const gridSize = 28;
+      dCtx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+      dCtx.lineWidth = 1;
+      for (let x = 0; x < w; x += gridSize) {
+        dCtx.beginPath();
+        dCtx.moveTo(x, 0);
+        dCtx.lineTo(x, h);
+        dCtx.stroke();
+      }
+      for (let y = 0; y < h; y += gridSize) {
+        dCtx.beginPath();
+        dCtx.moveTo(0, y);
+        dCtx.lineTo(w, y);
+        dCtx.stroke();
+      }
+
+      // 2. Gambar Semua Komponen
+      circuitComponents.forEach((comp) => {
+        const n1 = circuitNodes.find((n) => n.id === comp.n1);
+        const n2 = circuitNodes.find((n) => n.id === comp.n2);
+        if (!n1 || !n2) return;
+
+        const isSelected = comp.id === selectedCompId;
+        const dx = n2.x - n1.x;
+        const dy = n2.y - n1.y;
+        const len = Math.max(1, Math.hypot(dx, dy));
+        const angle = Math.atan2(dy, dx);
+        const midX = (n1.x + n2.x) / 2;
+        const midY = (n1.y + n2.y) / 2;
+
+        // Sorotan Seleksi
+        if (isSelected) {
+          dCtx.save();
+          dCtx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+          dCtx.lineWidth = 18;
+          dCtx.lineCap = 'round';
+          dCtx.beginPath();
+          dCtx.moveTo(n1.x, n1.y);
+          dCtx.lineTo(n2.x, n2.y);
+          dCtx.stroke();
+          dCtx.restore();
+        }
+
+        // Gambar kawat penghubung dasar dari ujung ke badan komponen
+        dCtx.save();
+        dCtx.strokeStyle = comp.type === 'wire' ? '#d97706' : '#94a3b8';
+        dCtx.lineWidth = comp.type === 'wire' ? 6 : 4.5;
+        dCtx.lineCap = 'round';
+        dCtx.beginPath();
+        dCtx.moveTo(n1.x, n1.y);
+        dCtx.lineTo(n2.x, n2.y);
+        dCtx.stroke();
+        dCtx.restore();
+
+        // Gambar Badan Komponen di Tengah
+        dCtx.save();
+        dCtx.translate(midX, midY);
+        dCtx.rotate(angle);
+
+        if (comp.type === 'battery') {
+          drawBatteryBody(dCtx, comp);
+        } else if (comp.type === 'resistor') {
+          drawResistorBody(dCtx, comp);
+        } else if (comp.type === 'bulb') {
+          drawBulbBody(dCtx, comp);
+        } else if (comp.type === 'switch') {
+          drawSwitchBody(dCtx, comp);
+        } else if (comp.type === 'ammeter') {
+          drawAmmeterBody(dCtx, comp);
+        }
+
+        dCtx.restore();
+
+        // 3. Animasi Aliran Elektron / Arus Konvensional
+        const absI = Math.abs(comp.current);
+        if (absI > 0.005) {
+          // Kecepatan visual proporsional terhadap arus (dengan batas nyaman mata)
+          const visualSpeed = Math.min(240, 22 + Math.pow(absI, 0.72) * 32);
+          // Arah arus konvensional: dari n1 ke n2 jika comp.current > 0
+          // Elektron bergerak berlawanan arah arus konvensional
+          const dir = dynOptions.electronFlow ? -Math.sign(comp.current) : Math.sign(comp.current);
+          comp.electronPhase = (comp.electronPhase + dir * visualSpeed * dt) % 28;
+          if (comp.electronPhase < 0) comp.electronPhase += 28;
+
+          const spacing = 28;
+          for (let d = comp.electronPhase; d < len; d += spacing) {
+            const px = n1.x + (dx / len) * d;
+            const py = n1.y + (dy / len) * d;
+
+            if (dynOptions.electronFlow) {
+              // Titik biru elektron
+              dCtx.beginPath();
+              dCtx.arc(px, py, 4.2, 0, Math.PI * 2);
+              dCtx.fillStyle = '#38bdf8';
+              dCtx.fill();
+              dCtx.strokeStyle = '#0f172a';
+              dCtx.lineWidth = 1;
+              dCtx.stroke();
+            } else {
+              // Panah merah arus konvensional
+              dCtx.save();
+              dCtx.translate(px, py);
+              dCtx.rotate(dir > 0 ? angle : angle + Math.PI);
+              dCtx.fillStyle = '#f43f5e';
+              dCtx.beginPath();
+              dCtx.moveTo(6, 0);
+              dCtx.lineTo(-4, -4.5);
+              dCtx.lineTo(-4, 4.5);
+              dCtx.closePath();
+              dCtx.fill();
+              dCtx.restore();
+            }
+          }
+
+          // Efek percikan api jika korsleting
+          if (isShortCircuit && Math.random() < 0.35) {
+            const sparkX = midX + (Math.random() - 0.5) * 24;
+            const sparkY = midY + (Math.random() - 0.5) * 24;
+            dCtx.fillStyle = '#fde047';
+            dCtx.beginPath();
+            dCtx.arc(sparkX, sparkY, 3 + Math.random() * 4, 0, Math.PI * 2);
+            dCtx.fill();
+          }
+        }
+
+        // 4. Label Nilai Komponen
+        if (dynOptions.showValues && comp.type !== 'wire') {
+          let labelText = '';
+          if (comp.type === 'battery') labelText = `${comp.voltage} V`;
+          else if (comp.type === 'resistor') labelText = `${comp.resistance} Ω`;
+          else if (comp.type === 'bulb') labelText = `${comp.resistance} Ω`;
+          else if (comp.type === 'ammeter') labelText = `${Math.abs(comp.current).toFixed(2)} A`;
+          else if (comp.type === 'switch') labelText = comp.closed ? 'ON' : 'OFF';
+
+          if (labelText) {
+            dCtx.save();
+            dCtx.font = 'bold 11px JetBrains Mono, monospace';
+            const textW = dCtx.measureText(labelText).width + 12;
+            const labelY = midY - 26;
+            dCtx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+            dCtx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+            dCtx.lineWidth = 1;
+            dCtx.beginPath();
+            dCtx.roundRect(midX - textW / 2, labelY - 10, textW, 20, 6);
+            dCtx.fill();
+            dCtx.stroke();
+
+            dCtx.fillStyle = '#f8fafc';
+            dCtx.textAlign = 'center';
+            dCtx.textBaseline = 'middle';
+            dCtx.fillText(labelText, midX, labelY);
+            dCtx.restore();
+          }
+        }
+      });
+
+      // 5. Gambar Semua Simpul Sambungan (Nodes)
+      circuitNodes.forEach((node) => {
+        const connectedCount = circuitComponents.filter((c) => c.n1 === node.id || c.n2 === node.id).length;
+        const isSnapTarget = node.id === snapHighlightNodeId;
+
+        dCtx.beginPath();
+        dCtx.arc(node.x, node.y, isSnapTarget ? 11 : 7.5, 0, Math.PI * 2);
+        if (isSnapTarget) {
+          dCtx.fillStyle = '#22c55e';
+        } else if (connectedCount > 1) {
+          dCtx.fillStyle = '#0f172a';
+        } else {
+          dCtx.fillStyle = '#ef4444';
+        }
+        dCtx.fill();
+        dCtx.lineWidth = 2.5;
+        dCtx.strokeStyle = connectedCount > 1 ? '#38bdf8' : '#fca5a5';
+        dCtx.stroke();
+      });
+
+      // 6. Gambar Probe Voltmeter (jika aktif)
+      if (dynOptions.voltmeterActive) {
+        drawVoltmeterProbes(dCtx);
+      }
+    }
+
+    function drawBatteryBody(ctx, comp) {
+      if (dynOptions.schematic) {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-16, -20, 32, 40);
+        // Garis pendek tebal (kutub negatif n1 di kiri)
+        ctx.strokeStyle = '#f8fafc';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(-8, -10);
+        ctx.lineTo(-8, 10);
+        ctx.stroke();
+        // Garis panjang tipis (kutub positif n2 di kanan)
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(8, -20);
+        ctx.lineTo(8, 20);
+        ctx.stroke();
+      } else {
+        // Silinder baterai realistis
+        ctx.fillStyle = '#1e293b';
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-28, -15, 52, 30, 5);
+        ctx.fill();
+        ctx.stroke();
+
+        // Kepala kutub positif (oranye/tembaga di kanan)
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.roundRect(12, -15, 14, 30, [0, 5, 5, 0]);
+        ctx.fill();
+
+        // Tonjolan positif
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(26, -6, 5, 12);
+
+        // Tanda + dan -
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('+', 19, 0);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillText('−', -16, 0);
+      }
+    }
+
+    function drawResistorBody(ctx, comp) {
+      if (dynOptions.schematic) {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-26, -12, 52, 24);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(-26, 0);
+        const peaks = [-20, -12, -4, 4, 12, 20];
+        peaks.forEach((px, idx) => {
+          ctx.lineTo(px, idx % 2 === 0 ? -9 : 9);
+        });
+        ctx.lineTo(26, 0);
+        ctx.stroke();
+      } else {
+        // Badan resistor keramik krem dengan pita warna
+        ctx.fillStyle = '#fde68a';
+        ctx.strokeStyle = '#b45309';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-26, -11, 52, 22, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        // Pita warna kode resistor
+        const bands = ['#dc2626', '#2563eb', '#16a34a', '#d97706'];
+        [-14, -5, 4, 14].forEach((bx, idx) => {
+          ctx.fillStyle = bands[idx];
+          ctx.fillRect(bx - 2, -10, 4, 20);
+        });
+      }
+    }
+
+    function drawBulbBody(ctx, comp) {
+      // Kecerahan berdasarkan daya listrik P (Watt)
+      const brightness = Math.min(1, comp.power / 18);
+
+      // Efek pendaran cahaya kuning realistis
+      if (brightness > 0.02) {
+        const glowRadius = 28 + brightness * 55;
+        const grad = ctx.createRadialGradient(0, -14, 4, 0, -14, glowRadius);
+        grad.addColorStop(0, `rgba(254, 240, 138, ${0.85 * brightness})`);
+        grad.addColorStop(0.5, `rgba(250, 204, 21, ${0.45 * brightness})`);
+        grad.addColorStop(1, 'rgba(250, 204, 21, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(0, -14, glowRadius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      if (dynOptions.schematic) {
+        ctx.fillStyle = brightness > 0.05 ? `rgba(253, 224, 71, ${0.25 + brightness * 0.65})` : '#0f172a';
+        ctx.strokeStyle = '#f8fafc';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Tanda silang X
+        ctx.beginPath();
+        ctx.moveTo(-12, -12);
+        ctx.lineTo(12, 12);
+        ctx.moveTo(12, -12);
+        ctx.lineTo(-12, 12);
+        ctx.stroke();
+      } else {
+        // Ulir dasar lampu
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(-10, -2, 20, 11);
+
+        // Kaca bohlam
+        ctx.beginPath();
+        ctx.arc(0, -16, 17, 0, Math.PI * 2);
+        ctx.fillStyle =
+          brightness > 0.02
+            ? `rgba(254, 249, 195, ${0.35 + brightness * 0.65})`
+            : 'rgba(226, 232, 240, 0.25)';
+        ctx.fill();
+        ctx.strokeStyle = brightness > 0.1 ? '#facc15' : '#cbd5e1';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Filamen menyala
+        ctx.strokeStyle = brightness > 0.05 ? '#fef08a' : '#64748b';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-5, -2);
+        ctx.lineTo(-4, -15);
+        ctx.lineTo(0, -19);
+        ctx.lineTo(4, -15);
+        ctx.lineTo(5, -2);
+        ctx.stroke();
+      }
+    }
+
+    function drawSwitchBody(ctx, comp) {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(-24, -18, 48, 26);
+
+      // Titik engsel kiri & kanan
+      ctx.fillStyle = '#cbd5e1';
+      ctx.beginPath();
+      ctx.arc(-18, 0, 4.5, 0, Math.PI * 2);
+      ctx.arc(18, 0, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Tuas sakelar
+      ctx.strokeStyle = comp.closed ? '#10b981' : '#f43f5e';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-18, 0);
+      if (comp.closed) {
+        ctx.lineTo(18, 0);
+      } else {
+        ctx.lineTo(14, -17);
+      }
+      ctx.stroke();
+    }
+
+    function drawAmmeterBody(ctx, comp) {
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, 19, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#22d3ee';
+      ctx.font = 'bold 14px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('A', 0, 1);
+    }
+
+    function drawVoltmeterProbes(ctx) {
+      [
+        { key: 'pos', probe: voltmeterProbes.pos, fill: '#ef4444', stroke: '#fecaca', txt: '+' },
+        { key: 'neg', probe: voltmeterProbes.neg, fill: '#1e293b', stroke: '#94a3b8', txt: '−' },
+      ].forEach(({ probe, fill, stroke, txt }) => {
+        ctx.save();
+        // Pegangan probe
+        ctx.fillStyle = fill;
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(probe.x - 8, probe.y - 34, 16, 24, 5);
+        ctx.fill();
+        ctx.stroke();
+
+        // Jarum ujung probe
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(probe.x, probe.y - 10);
+        ctx.lineTo(probe.x, probe.y);
+        ctx.stroke();
+
+        // Titik sentuh
+        ctx.fillStyle = fill;
+        ctx.beginPath();
+        ctx.arc(probe.x, probe.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Label + / -
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(txt, probe.x, probe.y - 18);
+        ctx.restore();
+      });
+    }
+
+    // =========================================================================
+    // INTERAKSI MOUSE & SENTUH PADA PAPAN RANGKAIAN DINAMIS
+    // =========================================================================
+    function pointToSegmentProjection(px, py, x1, y1, x2, y2) {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const l2 = dx * dx + dy * dy;
+      if (l2 === 0) return { dist: Math.hypot(px - x1, py - y1), t: 0 };
+      let t = ((px - x1) * dx + (py - y1) * dy) / l2;
+      t = Math.max(0, Math.min(1, t));
+      const projX = x1 + t * dx;
+      const projY = y1 + t * dy;
+      return { dist: Math.hypot(px - projX, py - projY), t };
+    }
+
+    let downPos = { x: 0, y: 0 };
+    let movedDuringDrag = false;
+
+    function onDynDown(evt) {
+      const pos = getCanvasPointerPos(dynCanvas, evt);
+      downPos = { ...pos };
+      movedDuringDrag = false;
+
+      // 1. Cek Probe Voltmeter jika aktif
+      if (dynOptions.voltmeterActive) {
+        if (Math.hypot(pos.x - voltmeterProbes.pos.x, pos.y - (voltmeterProbes.pos.y - 16)) <= 22) {
+          dragTarget = { kind: 'probePos', offsetX: pos.x - voltmeterProbes.pos.x, offsetY: pos.y - voltmeterProbes.pos.y };
+          return;
+        }
+        if (Math.hypot(pos.x - voltmeterProbes.neg.x, pos.y - (voltmeterProbes.neg.y - 16)) <= 22) {
+          dragTarget = { kind: 'probeNeg', offsetX: pos.x - voltmeterProbes.neg.x, offsetY: pos.y - voltmeterProbes.neg.y };
+          return;
+        }
+      }
+
+      // 2. Cek Node (Ujung Komponen) untuk diseret & disambung
+      for (let i = circuitNodes.length - 1; i >= 0; i--) {
+        const n = circuitNodes[i];
+        if (Math.hypot(pos.x - n.x, pos.y - n.y) <= 15) {
+          dragTarget = { kind: 'node', id: n.id, offsetX: pos.x - n.x, offsetY: pos.y - n.y };
+          return;
+        }
+      }
+
+      // 3. Cek Badan Komponen
+      for (let i = circuitComponents.length - 1; i >= 0; i--) {
+        const c = circuitComponents[i];
+        const n1 = circuitNodes.find((n) => n.id === c.n1);
+        const n2 = circuitNodes.find((n) => n.id === c.n2);
+        if (!n1 || !n2) continue;
+        const proj = pointToSegmentProjection(pos.x, pos.y, n1.x, n1.y, n2.x, n2.y);
+        if (proj.dist <= 20) {
+          selectComponent(c.id);
+          dragTarget = {
+            kind: 'comp',
+            id: c.id,
+            startX: pos.x,
+            startY: pos.y,
+            n1Start: { x: n1.x, y: n1.y },
+            n2Start: { x: n2.x, y: n2.y },
+          };
+          return;
+        }
+      }
+
+      // Klik area kosong -> batal pilih
+      selectComponent(null);
+    }
+
+    function onDynMove(evt) {
+      const pos = getCanvasPointerPos(dynCanvas, evt);
+      if (!dragTarget) return;
+      evt.preventDefault();
+
+      if (Math.hypot(pos.x - downPos.x, pos.y - downPos.y) > 4) {
+        movedDuringDrag = true;
+      }
+
+      if (dragTarget.kind === 'probePos') {
+        voltmeterProbes.pos.x = Math.max(15, Math.min(dynCanvas.width - 15, pos.x - dragTarget.offsetX));
+        voltmeterProbes.pos.y = Math.max(35, Math.min(dynCanvas.height - 15, pos.y - dragTarget.offsetY));
+        updateVoltmeterDisplay();
+      } else if (dragTarget.kind === 'probeNeg') {
+        voltmeterProbes.neg.x = Math.max(15, Math.min(dynCanvas.width - 15, pos.x - dragTarget.offsetX));
+        voltmeterProbes.neg.y = Math.max(35, Math.min(dynCanvas.height - 15, pos.y - dragTarget.offsetY));
+        updateVoltmeterDisplay();
+      } else if (dragTarget.kind === 'node') {
+        const node = circuitNodes.find((n) => n.id === dragTarget.id);
+        if (!node) return;
+        node.x = Math.max(16, Math.min(dynCanvas.width - 16, pos.x - dragTarget.offsetX));
+        node.y = Math.max(16, Math.min(dynCanvas.height - 16, pos.y - dragTarget.offsetY));
+
+        // Cek snap dengan node lain
+        snapHighlightNodeId = null;
+        for (const other of circuitNodes) {
+          if (other.id !== node.id && Math.hypot(other.x - node.x, other.y - node.y) <= 22) {
+            snapHighlightNodeId = other.id;
+            break;
+          }
+        }
+      } else if (dragTarget.kind === 'comp') {
+        const comp = circuitComponents.find((c) => c.id === dragTarget.id);
+        if (!comp) return;
+        const n1 = circuitNodes.find((n) => n.id === comp.n1);
+        const n2 = circuitNodes.find((n) => n.id === comp.n2);
+        if (!n1 || !n2) return;
+
+        // Hanya geser seluruh komponen jika kedua node eksklusif milik komponen ini
+        const n1Shared = circuitComponents.some((other) => other.id !== comp.id && (other.n1 === n1.id || other.n2 === n1.id));
+        const n2Shared = circuitComponents.some((other) => other.id !== comp.id && (other.n1 === n2.id || other.n2 === n2.id));
+
+        if (!n1Shared && !n2Shared) {
+          const dx = pos.x - dragTarget.startX;
+          const dy = pos.y - dragTarget.startY;
+          n1.x = Math.max(16, Math.min(dynCanvas.width - 16, dragTarget.n1Start.x + dx));
+          n1.y = Math.max(16, Math.min(dynCanvas.height - 16, dragTarget.n1Start.y + dy));
+          n2.x = Math.max(16, Math.min(dynCanvas.width - 16, dragTarget.n2Start.x + dx));
+          n2.y = Math.max(16, Math.min(dynCanvas.height - 16, dragTarget.n2Start.y + dy));
+        }
+      }
+    }
+
+    function onDynUp() {
+      if (!dragTarget) return;
+
+      // Jika klik singkat pada sakelar tanpa menggeser -> toggle buka/tutup sakelar
+      if (dragTarget.kind === 'comp' && !movedDuringDrag) {
+        const comp = circuitComponents.find((c) => c.id === dragTarget.id);
+        if (comp && comp.type === 'switch') {
+          comp.closed = !comp.closed;
+          updateSwitchButtonVisual(comp);
+          solveCircuitMNA();
+        }
+      }
+
+      // Jika melepas node di atas node lain -> gabungkan (merge) node
+      if (dragTarget.kind === 'node' && snapHighlightNodeId !== null) {
+        const draggedId = dragTarget.id;
+        const targetId = snapHighlightNodeId;
+        if (draggedId !== targetId) {
+          circuitComponents.forEach((c) => {
+            if (c.n1 === draggedId) c.n1 = targetId;
+            if (c.n2 === draggedId) c.n2 = targetId;
+          });
+          // Hapus komponen yang kedua ujungnya menyatu ke node yang sama
+          circuitComponents = circuitComponents.filter((c) => c.n1 !== c.n2);
+          cleanupUnusedNodes();
+          solveCircuitMNA();
+        }
+      }
+
+      snapHighlightNodeId = null;
+      dragTarget = null;
+    }
+
+    // Klik ganda pada node sambungan untuk memisahkan sambungan
+    function onDynDblClick(evt) {
+      const pos = getCanvasPointerPos(dynCanvas, evt);
+      for (const n of circuitNodes) {
+        if (Math.hypot(pos.x - n.x, pos.y - n.y) <= 16) {
+          const attached = circuitComponents.filter((c) => c.n1 === n.id || c.n2 === n.id);
+          if (attached.length > 1) {
+            attached.forEach((c, idx) => {
+              if (idx === 0) return;
+              const splitNode = createNode(n.x + (idx % 2 === 0 ? -14 : 14), n.y + 12);
+              if (c.n1 === n.id) c.n1 = splitNode.id;
+              if (c.n2 === n.id) c.n2 = splitNode.id;
+            });
+            solveCircuitMNA();
+          }
+          break;
+        }
+      }
+    }
+
+    dynCanvas.addEventListener('mousedown', onDynDown);
+    dynCanvas.addEventListener('mousemove', onDynMove);
+    window.addEventListener('mouseup', onDynUp);
+    dynCanvas.addEventListener('dblclick', onDynDblClick);
+    dynCanvas.addEventListener('touchstart', onDynDown, { passive: false });
+    dynCanvas.addEventListener('touchmove', onDynMove, { passive: false });
+    window.addEventListener('touchend', onDynUp);
+
+    // =========================================================================
+    // LOOP ANIMASI UTAMA (60 FPS)
+    // =========================================================================
+    let lastTimestamp = 0;
+
+    function mainAnimationLoop(timestamp) {
+      const dt = Math.min(0.05, (timestamp - lastTimestamp) / 1000 || 0.016);
+      lastTimestamp = timestamp;
+
+      if (activeTab === 'static') {
+        updateStaticPhysics();
+        drawStaticScene();
+      } else {
+        drawDynamicScene(dt);
+      }
+
+      requestAnimationFrame(mainAnimationLoop);
+    }
+
+    window.addEventListener('resize', () => {
+      if (activeTab === 'static') resizeStaticCanvas();
+      else resizeDynamicCanvas();
+    });
+
+    window.onload = function () {
+      initStaticEntities();
+      resizeStaticCanvas();
+      bindInspectorInputs();
+      // Siapkan preset rangkaian seri di latar belakang saat pengguna berpindah ke tab 2
+      loadCircuitPreset('series');
+      requestAnimationFrame(mainAnimationLoop);
+    };
+  </script>
+</body>
+</html>
